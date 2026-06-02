@@ -1,0 +1,3007 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InvestIQ — Premium Equity Research Workspace</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Theme Init to prevent flash of light theme -->
+  <script>
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui'],
+            heading: ['Outfit', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          borderRadius: {
+            '2xl': '1rem',
+            '3xl': '1.5rem',
+          },
+          colors: {
+            primary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style type="text/css">
+    /* Custom Styling for Premium Look */
+    body {
+      background-color: #f8fafc; /* slate-50 */
+      color: #0f172a; /* slate-900 */
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .dark body {
+      background-color: #020617; /* slate-950 */
+      color: #f8fafc; /* slate-50 */
+    }
+    
+    .sidebar-active {
+      background-color: rgba(124, 58, 237, 0.08); /* primary-600 at 8% opacity */
+      color: #7c3aed; /* primary-600 */
+      font-weight: 600;
+      border-left: 3px solid #7c3aed;
+    }
+    
+    .dark .sidebar-active {
+      background-color: rgba(167, 139, 250, 0.12);
+      color: #a78bfa; /* primary-400 */
+      border-left: 3px solid #a78bfa;
+    }
+    
+    .sidebar-inactive {
+      color: #64748b; /* slate-500 */
+      border-left: 3px solid transparent;
+    }
+    
+    .dark .sidebar-inactive {
+      color: #94a3b8; /* slate-400 */
+    }
+    
+    .sidebar-inactive:hover {
+      background-color: #f1f5f9; /* slate-100 */
+      color: #1e293b; /* slate-800 */
+    }
+    
+    .dark .sidebar-inactive:hover {
+      background-color: #1e293b;
+      color: #f1f5f9;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    
+    /* Premium Sparklines and Animation */
+    .glow-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glow-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -8px rgba(124, 58, 237, 0.15);
+    }
+    .dark .glow-hover:hover {
+      box-shadow: 0 12px 24px -8px rgba(167, 139, 250, 0.25);
+    }
+    
+    /* Command Palette Transition */
+    .dialog-backdrop {
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      transition: opacity 0.2s ease;
+    }
+    .dark .dialog-backdrop {
+      background-color: rgba(2, 6, 23, 0.7);
+    }
+    
+    /* India-native formatting utilities */
+    .num-inr::before {
+      content: "₹";
+      margin-right: 0.1rem;
+    }
+    
+    /* Drag & Drop Visuals */
+    .draggable-card {
+      cursor: grab;
+      user-select: none;
+    }
+    .draggable-card:active {
+      cursor: grabbing;
+      opacity: 0.6;
+    }
+    
+    /* Tooltip */
+    .has-tooltip {
+      position: relative;
+    }
+    .tooltip-text {
+      visibility: hidden;
+      position: absolute;
+      z-index: 50;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: opacity 0.2s;
+    }
+    .has-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Custom Switch style */
+    .switch-checkbox:checked + .switch-label {
+      background-color: #7c3aed;
+    }
+    .switch-checkbox:checked + .switch-label .switch-dot {
+      transform: translateX(100%);
+    }
+
+    /* ─── DARK MODE CLASS OVERRIDES ─── */
+    .dark .bg-white {
+      background-color: #0f172a !important; /* slate-900 */
+      background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 0%, transparent 100%) !important;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+    }
+    .dark .border-slate-200, 
+    .dark .border-slate-100 {
+      border-color: #1e293b !important; /* slate-800 */
+    }
+    .dark .bg-slate-50 {
+      background-color: #020617 !important; /* slate-950 */
+    }
+    .dark .bg-slate-50\/50 {
+      background-color: rgba(2, 6, 23, 0.4) !important;
+    }
+    .dark .text-slate-900 {
+      color: #f8fafc !important; /* slate-50 */
+    }
+    .dark .text-slate-800 {
+      color: #e2e8f0 !important; /* slate-200 */
+    }
+    .dark .text-slate-700 {
+      color: #cbd5e1 !important; /* slate-300 */
+    }
+    .dark .text-slate-600 {
+      color: #94a3b8 !important; /* slate-400 */
+    }
+    .dark .text-slate-500 {
+      color: #64748b !important; /* slate-500 */
+    }
+    .dark .text-slate-400 {
+      color: #475569 !important; /* slate-600 */
+    }
+    .dark select, 
+    .dark input, 
+    .dark textarea {
+      background-color: #020617 !important;
+      border-color: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+    .dark select:focus, 
+    .dark input:focus, 
+    .dark textarea:focus {
+      border-color: #8b5cf6 !important; /* primary-500 */
+    }
+    .dark kbd {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #cbd5e1 !important;
+    }
+    
+    /* AI Signals Dark Mappings */
+    .dark .bg-emerald-50 {
+      background-color: rgba(16, 185, 129, 0.1) !important;
+      color: #34d399 !important;
+      border-color: rgba(16, 185, 129, 0.2) !important;
+    }
+    .dark .text-emerald-600 {
+      color: #34d399 !important;
+    }
+    
+    .dark .bg-amber-50 {
+      background-color: rgba(245, 158, 11, 0.1) !important;
+      color: #fbbf24 !important;
+      border-color: rgba(245, 158, 11, 0.2) !important;
+    }
+    .dark .text-amber-600 {
+      color: #fbbf24 !important;
+    }
+    
+    .dark .bg-red-50 {
+      background-color: rgba(239, 68, 68, 0.1) !important;
+      color: #f87171 !important;
+      border-color: rgba(239, 68, 68, 0.2) !important;
+    }
+    .dark .text-red-650, 
+    .dark .text-red-600 {
+      color: #f87171 !important;
+    }
+    .dark .bg-indigo-50 {
+      background-color: rgba(139, 92, 246, 0.1) !important;
+      color: #c084fc !important;
+      border-color: rgba(139, 92, 246, 0.2) !important;
+    }
+    
+    /* Hover overrides in Dark mode */
+    .dark .hover\:bg-slate-50:hover {
+      background-color: #1e293b !important;
+    }
+    .dark .hover\:bg-slate-100:hover {
+      background-color: #1e293b !important;
+    }
+    .dark .hover\:bg-slate-100\/50:hover {
+      background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+    .dark .hover\:text-slate-900:hover {
+      color: #ffffff !important;
+    }
+    .dark .hover\:text-slate-800:hover {
+      color: #ffffff !important;
+    }
+    
+    /* Technical numbers style */
+    .num-inr, .stat-num {
+      font-family: 'Fira Code', monospace !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+  </style>
+</head>
+<body class="h-full font-sans flex flex-col md:flex-row overflow-hidden bg-slate-50">
+
+  <!-- ──────────────────────── ONBOARDING FLOW WIDGET (G10) ──────────────────────── -->
+  <div id="onboarding-tour" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform scale-100 transition-transform duration-300 relative mx-4">
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-primary-500 to-indigo-600 shadow-lg text-white">
+        <i data-lucide="sparkles" class="h-10 w-10 animate-pulse"></i>
+      </div>
+      
+      <div class="mt-8 text-center">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">Step 1 of 3</span>
+        <h3 class="text-2xl font-bold font-heading text-slate-800 mt-3">Welcome to InvestIQ</h3>
+        <p class="text-slate-600 mt-2 text-sm leading-relaxed">
+          An AI-first equity research platform optimized for NSE/BSE. Let's take a quick 3-step tour of the primary analyst workflow.
+        </p>
+      </div>
+
+      <div class="mt-6 border-t border-slate-100 pt-6 space-y-4">
+        <div id="tour-step-content" class="text-sm text-slate-700 bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-start gap-3">
+          <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 font-bold text-xs">1</span>
+          <div>
+            <strong class="text-slate-950 block">Search & Ticker Detail</strong>
+            Use the global command palette (<kbd class="bg-white border px-1.5 py-0.5 rounded text-xs shadow-sm">Ctrl+K</kbd>) to instantly pull up any company like RELIANCE, HDFCBANK, or TCS.
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-between gap-4">
+        <button onclick="skipOnboarding()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold transition">Dismiss Tour</button>
+        <button id="tour-next-btn" onclick="nextTourStep()" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary-500/20 transition">
+          Next Step <i data-lucide="arrow-right" class="h-4 w-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────── COMMAND PALETTE MODAL (G1) ──────────────────────── -->
+  <div id="command-palette" class="fixed inset-0 z-50 hidden flex justify-center pt-[15vh]" onclick="toggleCommandPalette(false)">
+    <div class="fixed inset-0 dialog-backdrop"></div>
+    <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden relative flex flex-col h-[480px] mx-4 transform scale-95 transition-transform" onclick="event.stopPropagation()">
+      <!-- Search Input -->
+      <div class="flex items-center border-b border-slate-100 px-4 py-4 gap-3 bg-slate-50">
+        <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
+        <input 
+          type="text" 
+          id="cmd-search-input" 
+          placeholder="Search tickers, screens, tools, or ask anything... (e.g. RELIANCE, FMCG, screener)" 
+          class="w-full bg-transparent border-0 outline-none text-slate-800 placeholder-slate-400 text-base"
+          oninput="handleCommandPaletteSearch()"
+          autocomplete="off"
+        />
+        <span class="text-xs font-semibold text-slate-400 border border-slate-200 rounded px-1.5 py-0.5 bg-white shadow-xs">ESC</span>
+      </div>
+
+      <!-- Results Area -->
+      <div id="cmd-results" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Default State: Recently Viewed + Quick Actions -->
+        <div id="cmd-default-view">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-2">Recently Viewed</div>
+            <div class="space-y-1">
+              <div onclick="navigateToCompany('RELIANCE')" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 font-bold text-xs">R</span>
+                  <div>
+                    <span class="font-bold text-slate-900">RELIANCE</span>
+                    <span class="text-xs text-slate-500 ml-2">Reliance Industries Ltd.</span>
+                  </div>
+                </div>
+                <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Oil & Gas</span>
+              </div>
+              <div onclick="navigateToCompany('HDFCBANK')" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 font-bold text-xs">H</span>
+                  <div>
+                    <span class="font-bold text-slate-900">HDFCBANK</span>
+                    <span class="text-xs text-slate-500 ml-2">HDFC Bank Limited</span>
+                  </div>
+                </div>
+                <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Banking</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-2">Quick Actions</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div onclick="executeQuickAction('screener')" class="cmd-item border border-slate-100 hover:border-primary-100 p-3 rounded-xl hover:bg-primary-50/30 cursor-pointer transition flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600"><i data-lucide="filter" class="h-4 w-4"></i></div>
+                <div class="text-left"><span class="block font-semibold text-xs text-slate-800">Run New Screen</span><span class="text-[10px] text-slate-400">Open Screener Engine</span></div>
+              </div>
+              <div onclick="executeQuickAction('valuation')" class="cmd-item border border-slate-100 hover:border-primary-100 p-3 rounded-xl hover:bg-primary-50/30 cursor-pointer transition flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600"><i data-lucide="calculator" class="h-4 w-4"></i></div>
+                <div class="text-left"><span class="block font-semibold text-xs text-slate-800">Open Valuation Workbench</span><span class="text-[10px] text-slate-400">Run DCF Model</span></div>
+              </div>
+              <div onclick="executeQuickAction('questions')" class="cmd-item border border-slate-100 hover:border-primary-100 p-3 rounded-xl hover:bg-primary-50/30 cursor-pointer transition flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600"><i data-lucide="help-circle" class="h-4 w-4"></i></div>
+                <div class="text-left"><span class="block font-semibold text-xs text-slate-800">Generate Questions</span><span class="text-[10px] text-slate-400">Create pre-call packs</span></div>
+              </div>
+              <div onclick="executeQuickAction('compare')" class="cmd-item border border-slate-100 hover:border-primary-100 p-3 rounded-xl hover:bg-primary-50/30 cursor-pointer transition flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600"><i data-lucide="columns" class="h-4 w-4"></i></div>
+                <div class="text-left"><span class="block font-semibold text-xs text-slate-800">Compare Companies</span><span class="text-[10px] text-slate-400">Side-by-side radar</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filtered results -->
+        <div id="cmd-filtered-view" class="hidden">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-2" id="cmd-result-title">Matching Results</div>
+          <div class="space-y-1" id="cmd-filtered-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer instructions -->
+      <div class="bg-slate-50 border-t border-slate-100 px-4 py-2.5 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-3">
+          <span><kbd class="border px-1 py-0.2 rounded bg-white shadow-2xs font-mono">↑↓</kbd> Navigate</span>
+          <span><kbd class="border px-1 py-0.2 rounded bg-white shadow-2xs font-mono">Enter</kbd> Select</span>
+        </div>
+        <div>
+          <span>Esc to exit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────── SIDEBAR / MOBILE NAVIGATION (G12) ──────────────────────── -->
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 flex-shrink-0 border-r border-slate-800 relative z-20">
+    <!-- Brand Header -->
+    <div class="flex items-center gap-2 px-6 py-5 border-b border-slate-800">
+      <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-primary-500 to-indigo-600 shadow-md">
+        <i data-lucide="bar-chart-2" class="h-4.5 w-4.5 text-white"></i>
+      </span>
+      <div>
+        <span class="text-base font-bold text-white tracking-tight font-heading block leading-none">InvestIQ</span>
+        <span class="text-[10px] text-primary-400 font-semibold tracking-wider uppercase">Equity Research Platform</span>
+      </div>
+    </div>
+    
+    <!-- Sidebar Sections -->
+    <div class="flex-1 overflow-y-auto py-6 px-3 space-y-7">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 block mb-2">Core</span>
+        <nav class="space-y-1">
+          <a href="#dashboard" onclick="setRoute('dashboard')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-dashboard">
+            <i data-lucide="layout-dashboard" class="h-4 w-4"></i> Dashboard
+          </a>
+          <a href="#companies" onclick="setRoute('companies')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-companies">
+            <i data-lucide="building-2" class="h-4 w-4"></i> Companies
+          </a>
+          <a href="#compare" onclick="setRoute('compare')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-compare">
+            <i data-lucide="columns" class="h-4 w-4"></i> Compare
+          </a>
+        </nav>
+      </div>
+
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 block mb-2">Intelligence</span>
+        <nav class="space-y-1">
+          <a href="#screener" onclick="setRoute('screener')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-screener">
+            <i data-lucide="filter" class="h-4 w-4"></i> Screener
+          </a>
+          <a href="#validation" onclick="setRoute('validation')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-validation">
+            <i data-lucide="shield-check" class="h-4 w-4"></i> Validation Engine
+          </a>
+        </nav>
+      </div>
+
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 block mb-2">Research</span>
+        <nav class="space-y-1">
+          <a href="#research" onclick="setRoute('research')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-research">
+            <i data-lucide="phone-call" class="h-4 w-4"></i> Research Hub
+          </a>
+          <a href="#questions" onclick="setRoute('questions')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-questions">
+            <i data-lucide="help-circle" class="h-4 w-4"></i> Question Engine
+          </a>
+          <a href="#reports" onclick="setRoute('reports')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-reports">
+            <i data-lucide="file-text" class="h-4 w-4"></i> Reports
+          </a>
+        </nav>
+      </div>
+
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 block mb-2">Valuation</span>
+        <nav class="space-y-1">
+          <a href="#valuation" onclick="setRoute('valuation')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-valuation">
+            <i data-lucide="calculator" class="h-4 w-4"></i> Valuation Workbench
+          </a>
+          <a href="#unit-economics" onclick="setRoute('unit-economics')" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition" id="nav-unit-economics">
+            <i data-lucide="bar-chart-3" class="h-4 w-4"></i> Unit Economics
+          </a>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-xs">
+      <a href="#admin" onclick="setRoute('admin')" class="flex items-center justify-between p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition" id="nav-admin">
+        <span class="flex items-center gap-2"><i data-lucide="settings" class="h-3.5 w-3.5"></i> Admin & Data Ops</span>
+        <span class="text-[9px] font-bold uppercase bg-slate-800 px-1.5 py-0.5 rounded text-primary-400 border border-slate-700">Admin</span>
+      </a>
+      <div class="mt-3 flex items-center justify-between text-slate-500 px-2">
+        <button onclick="toggleOnboarding()" class="text-slate-400 hover:text-white hover:underline transition flex items-center gap-1"><i data-lucide="help-circle" class="h-3 w-3"></i> Tour</button>
+        <button onclick="toggleDarkMode()" class="text-slate-400 hover:text-white hover:underline transition flex items-center gap-1"><i data-lucide="moon" class="h-3 w-3"></i> Theme</button>
+        <span>V1.0</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Bottom Navigation (G12) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900 border-t border-slate-800 text-slate-400 flex items-center justify-around py-2 px-1 pb-safe shadow-2xl">
+    <a href="#dashboard" onclick="setRoute('dashboard')" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1" id="mob-dashboard">
+      <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+      <span class="text-[9px] font-medium tracking-tight">Dashboard</span>
+    </a>
+    <a href="#companies" onclick="setRoute('companies')" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1" id="mob-companies">
+      <i data-lucide="building-2" class="h-5 w-5"></i>
+      <span class="text-[9px] font-medium tracking-tight">Companies</span>
+    </a>
+    <a href="#screener" onclick="setRoute('screener')" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1" id="mob-screener">
+      <i data-lucide="filter" class="h-5 w-5"></i>
+      <span class="text-[9px] font-medium tracking-tight">Screener</span>
+    </a>
+    <a href="#research" onclick="setRoute('research')" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1" id="mob-research">
+      <i data-lucide="phone-call" class="h-5 w-5"></i>
+      <span class="text-[9px] font-medium tracking-tight">Research</span>
+    </a>
+    <button onclick="toggleMobileMore()" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 relative" id="mob-more">
+      <i data-lucide="menu" class="h-5 w-5" id="mob-more-icon"></i>
+      <span class="text-[9px] font-medium tracking-tight">More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu Dropdown -->
+  <div id="mobile-more-menu" class="hidden md:hidden fixed bottom-14 left-4 right-4 z-40 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-4 grid grid-cols-2 gap-2 text-slate-300">
+    <a href="#compare" onclick="setRoute('compare'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="columns" class="h-4 w-4 text-primary-400"></i><span class="text-xs">Compare</span></a>
+    <a href="#validation" onclick="setRoute('validation'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="shield-check" class="h-4 w-4 text-primary-400"></i><span class="text-xs">Validation</span></a>
+    <a href="#questions" onclick="setRoute('questions'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="help-circle" class="h-4 w-4 text-primary-400"></i><span class="text-xs">Question Gen</span></a>
+    <a href="#valuation" onclick="setRoute('valuation'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="calculator" class="h-4 w-4 text-primary-400"></i><span class="text-xs">DCF Model</span></a>
+    <a href="#unit-economics" onclick="setRoute('unit-economics'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="bar-chart-3" class="h-4 w-4 text-primary-400"></i><span class="text-xs">Unit Economics</span></a>
+    <a href="#reports" onclick="setRoute('reports'); toggleMobileMore(false)" class="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-800"><i data-lucide="file-text" class="h-4 w-4 text-primary-400"></i><span class="text-xs">Reports</span></a>
+    <a href="#admin" onclick="setRoute('admin'); toggleMobileMore(false)" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/50 border border-slate-800 text-primary-400 col-span-2 mt-1">
+      <span class="flex items-center gap-2.5"><i data-lucide="settings" class="h-4 w-4"></i><span class="text-xs font-semibold">Admin Panel</span></span>
+      <span class="text-[9px] uppercase bg-slate-800 px-1.5 py-0.5 rounded">Engineers Only</span>
+    </a>
+  </div>
+
+
+  <!-- ──────────────────────── MAIN APPLICATION CONTAINER ──────────────────────── -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden pb-14 md:pb-0 h-full">
+
+    <!-- TOP HEADER -->
+    <header class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 backdrop-blur z-10 transition-colors">
+      <!-- Breadcrumbs and context navigation -->
+      <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-450" id="header-context">
+        <span class="font-semibold text-slate-800 dark:text-slate-100">InvestIQ</span>
+        <i data-lucide="chevron-right" class="h-4.5 w-4.5 text-slate-300 dark:text-slate-700"></i>
+        <span id="breadcrumb-current" class="dark:text-slate-300">Dashboard</span>
+      </div>
+      
+      <!-- Quick search, theme toggle and signals -->
+      <div class="flex items-center gap-3">
+        <!-- Search Trigger Button -->
+        <button onclick="toggleCommandPalette(true)" class="flex items-center justify-between w-64 px-3 py-1.5 text-xs text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition cursor-pointer">
+          <span class="flex items-center gap-2"><i data-lucide="search" class="h-3.5 w-3.5"></i> Search ticker or tool...</span>
+          <kbd class="bg-white dark:bg-slate-800 border dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs font-mono text-[9px]">Ctrl+K</kbd>
+        </button>
+
+        <!-- Dark Mode Toggle Button -->
+        <button onclick="toggleDarkMode()" class="h-8 w-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-lucide="sun" class="h-4.5 w-4.5 hidden dark:block"></i>
+          <i data-lucide="moon" class="h-4.5 w-4.5 block dark:hidden"></i>
+        </button>
+
+        <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 px-2.5 py-1 rounded-full">
+          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span> Live Ingestion active
+        </span>
+      </div>
+    </header>
+
+    <!-- CONTENT PANELS -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8" id="main-content">
+
+      <!-- ==================== SCREEN 1: ANALYST DASHBOARD (G2) ==================== -->
+      <section id="view-dashboard" class="space-y-6">
+        <!-- Gradient header -->
+        <div class="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xl relative overflow-hidden">
+          <!-- background glow -->
+          <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-primary-600/20 blur-3xl"></div>
+          <div>
+            <h1 class="text-3xl font-bold font-heading">Equity Intelligence Feed</h1>
+            <p class="text-slate-400 text-sm mt-1 max-w-xl">AI-first watchlist, screens, and concall analyses for listed Indian companies.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="toggleCommandPalette(true)" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition shadow-lg shadow-primary-600/30">
+              <i data-lucide="terminal" class="h-4 w-4"></i> Command Palette
+            </button>
+            <button onclick="setRoute('screener')" class="inline-flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition">
+              <i data-lucide="filter" class="h-4 w-4"></i> Run Screener
+            </button>
+          </div>
+        </div>
+
+        <!-- MACRO STRIP (G2) -->
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nifty 50</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">24,320</span>
+              <span class="text-[11px] font-semibold text-emerald-600">▲ 0.8%</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">BSE Sensex</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">79,480</span>
+              <span class="text-[11px] font-semibold text-emerald-600">▲ 0.6%</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">India VIX</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">13.4</span>
+              <span class="text-[11px] font-semibold text-red-500">▼ 4.2%</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">USD-INR</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">₹83.45</span>
+              <span class="text-[11px] font-semibold text-slate-500">→ 0.0%</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">RBI Repo Rate</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">6.50%</span>
+              <span class="text-[11px] font-semibold text-slate-400">Unchanged</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPI Inflation</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-base font-bold font-heading">4.85%</span>
+              <span class="text-[11px] font-semibold text-emerald-600">▼ Apr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WATCHLIST STRIP (G2 - Pinned tickers with last AI signal + Sparkline) -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="pin" class="h-4.5 w-4.5 text-primary-500 rotate-45"></i>
+              <h2 class="text-lg font-bold font-heading text-slate-900">Watchlist Tickers & Last AI Signal</h2>
+            </div>
+            <button onclick="toggleCommandPalette(true)" class="text-xs text-primary-600 font-semibold hover:underline flex items-center gap-1">
+              + Add Ticker
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Reliance Pinned Watchlist Item -->
+            <div onclick="navigateToCompany('RELIANCE')" class="group border border-slate-100 hover:border-primary-100 bg-slate-50/50 p-4 rounded-2xl cursor-pointer glow-hover flex flex-col md:flex-row justify-between gap-4">
+              <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900">RELIANCE</span>
+                  <span class="text-xs text-slate-400">Reliance Industries Ltd.</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-lg font-bold num-inr text-slate-800">2,912.45</span>
+                  <span class="text-xs font-semibold text-emerald-600">▲ +1.4%</span>
+                </div>
+                <!-- AI Signal Badge -->
+                <div class="inline-flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-xl">
+                  <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                  <span>Positive: Q4 margin expansion in Retail offsets O2C softness</span>
+                </div>
+              </div>
+              <div class="flex flex-col justify-between items-end gap-2 w-32">
+                <span class="text-[10px] text-slate-400">Trend (60 Quarters)</span>
+                <!-- Sparkline SVG -->
+                <svg viewBox="0 0 120 40" class="w-28 h-10">
+                  <path d="M0,35 L10,32 L20,38 L30,25 L40,30 L50,15 L60,18 L70,8 L80,14 L90,6 L100,10 L110,2 L120,4" fill="none" stroke="#10b981" stroke-width="2" />
+                </svg>
+                <span class="text-[10px] text-slate-500 font-medium">Cap: ₹19.7L Cr</span>
+              </div>
+            </div>
+
+            <!-- HDFC Bank Pinned Watchlist Item -->
+            <div onclick="navigateToCompany('HDFCBANK')" class="group border border-slate-100 hover:border-primary-100 bg-slate-50/50 p-4 rounded-2xl cursor-pointer glow-hover flex flex-col md:flex-row justify-between gap-4">
+              <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900">HDFCBANK</span>
+                  <span class="text-xs text-slate-400">HDFC Bank Limited</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-lg font-bold num-inr text-slate-800">1,542.20</span>
+                  <span class="text-xs font-semibold text-red-500">▼ -0.7%</span>
+                </div>
+                <!-- AI Signal Badge (Warning) -->
+                <div class="inline-flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-xl">
+                  <i data-lucide="alert-triangle" class="h-3.5 w-3.5"></i>
+                  <span>Warning: Higher cost of funds compressing NIM in post-merger quarters</span>
+                </div>
+              </div>
+              <div class="flex flex-col justify-between items-end gap-2 w-32">
+                <span class="text-[10px] text-slate-400">Trend (60 Quarters)</span>
+                <!-- Sparkline SVG -->
+                <svg viewBox="0 0 120 40" class="w-28 h-10">
+                  <path d="M0,10 L10,12 L20,8 L30,15 L40,12 L50,18 L60,15 L70,22 L80,20 L90,28 L100,24 L110,28 L120,32" fill="none" stroke="#f59e0b" stroke-width="2" />
+                </svg>
+                <span class="text-[10px] text-slate-500 font-medium">Cap: ₹11.7L Cr</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- SAVED SCREENS (G2 - Resume last 3) -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-1">
+            <div class="flex items-center gap-2">
+              <i data-lucide="save" class="h-4.5 w-4.5 text-slate-400"></i>
+              <h2 class="text-base font-bold font-heading text-slate-900">Saved Screens</h2>
+            </div>
+            
+            <div class="space-y-2" id="saved-screens-dashboard-list">
+              <!-- Dynamically populated or default fallback -->
+              <div onclick="resumeSavedScreen('High Growth ROCE')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer transition">
+                <span class="font-semibold text-xs text-slate-800 block">High Growth ROCE</span>
+                <span class="text-[10px] text-slate-500">ROCE > 20%, CAGR 3Y > 15%, Debt/Equity < 0.5</span>
+              </div>
+              <div onclick="resumeSavedScreen('Undervalued Leaders')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer transition">
+                <span class="font-semibold text-xs text-slate-800 block">Undervalued Leaders</span>
+                <span class="text-[10px] text-slate-500">P/E < 20, Market Cap > ₹10,000 Cr, ROCE > 15%</span>
+              </div>
+              <div onclick="resumeSavedScreen('FMCG Cash Flow Compounders')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer transition">
+                <span class="font-semibold text-xs text-slate-800 block">FMCG Cash Flow Compounders</span>
+                <span class="text-[10px] text-slate-500">Sector = FMCG, CFO/EBITDA > 80%</span>
+              </div>
+            </div>
+            
+            <button onclick="setRoute('screener')" class="w-full text-center py-2 border border-dashed rounded-xl text-xs text-slate-500 hover:text-primary-600 hover:border-primary-400 transition">
+              Create New Screen
+            </button>
+          </div>
+
+          <!-- RECENT CONCALLS RESEARCHED (G2) -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="headphones" class="h-4.5 w-4.5 text-slate-400"></i>
+              <h2 class="text-base font-bold font-heading text-slate-900">Recent Concalls Researched This Week</h2>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex items-start justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100/50 transition">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-slate-800">RELIANCE</span>
+                    <span class="text-[10px] bg-indigo-50 text-primary-600 px-2 py-0.5 rounded-full font-bold">Q4FY26</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">Focus on retail EBITDA trajectory and capital expenditure timeline for 5G & Green Energy.</p>
+                  <span class="text-[10px] text-slate-400 mt-2 block flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> 2 hours ago</span>
+                </div>
+                <button onclick="navigateToResearch('RELIANCE')" class="text-xs font-semibold text-primary-600 hover:underline flex items-center gap-1">
+                  View <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                </button>
+              </div>
+
+              <div class="flex items-start justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100/50 transition">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-slate-800">TCS</span>
+                    <span class="text-[10px] bg-indigo-50 text-primary-600 px-2 py-0.5 rounded-full font-bold">Q4FY26</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">Discussions on BFSI demand recovery in US/Europe and deal execution cycles.</p>
+                  <span class="text-[10px] text-slate-400 mt-2 block flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Yesterday</span>
+                </div>
+                <button onclick="navigateToResearch('TCS')" class="text-xs font-semibold text-primary-600 hover:underline flex items-center gap-1">
+                  View <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLLAPSED BY DEFAULT LEADERBOARD (G2) -->
+        <div class="border border-slate-200 rounded-3xl bg-white overflow-hidden shadow-xs">
+          <button onclick="toggleLeaderboard()" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition">
+            <div class="flex items-center gap-2">
+              <i data-lucide="trophy" class="h-4.5 w-4.5 text-amber-500"></i>
+              <span class="font-bold font-heading text-slate-900">Ingestion Leaderboard & Leader Updates</span>
+              <span class="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-2">Optional view</span>
+            </div>
+            <i data-lucide="chevron-down" id="leaderboard-arrow" class="h-5 w-5 text-slate-400 transition-transform duration-300"></i>
+          </button>
+          
+          <div id="leaderboard-content" class="hidden border-t border-slate-100 p-6 bg-slate-50/50">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h3 class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Highest Ingestion Volume</h3>
+                <ol class="space-y-2 text-xs">
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">1. Reliance Industries</span>
+                    <span class="font-bold text-slate-900">2,410 filings</span>
+                  </li>
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">2. HDFC Bank</span>
+                    <span class="font-bold text-slate-900">1,940 filings</span>
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Most Anomalies Flagged</h3>
+                <ol class="space-y-2 text-xs">
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">1. Adani Enterprises</span>
+                    <span class="font-bold text-red-600">12 Flags</span>
+                  </li>
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">2. Yes Bank</span>
+                    <span class="font-bold text-amber-600">8 Flags</span>
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Data Integrity Rating</h3>
+                <ol class="space-y-2 text-xs">
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">1. TCS Ltd.</span>
+                    <span class="font-bold text-emerald-600">9.9 / 10</span>
+                  </li>
+                  <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100">
+                    <span class="font-medium text-slate-700">2. Infosys Ltd.</span>
+                    <span class="font-bold text-emerald-600">9.8 / 10</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT NEWS & ALERTS -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold font-heading text-slate-900">Latest Indian Corporate News & Signal Feed</h2>
+            <span class="text-xs text-slate-400">Ingested 10 mins ago</span>
+          </div>
+          <div class="space-y-3">
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-start gap-4">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 flex-shrink-0"><i data-lucide="newspaper" class="h-4.5 w-4.5"></i></span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-xs text-slate-800">RELIANCE</span>
+                  <span class="text-[10px] text-slate-400">NSE / News</span>
+                </div>
+                <h4 class="text-sm font-semibold text-slate-900 mt-1">Reliance Retail expands supply chain partnership with major FMCG distributor.</h4>
+                <p class="text-xs text-slate-500 mt-1">Expected to boost retail margin efficiency by 15-20 bps. Integrated into AI analysis scorecards.</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-start gap-4">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600 flex-shrink-0"><i data-lucide="alert-octagon" class="h-4.5 w-4.5"></i></span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-xs text-slate-800">ADANIPORTS</span>
+                  <span class="text-[10px] text-slate-400">BSE / Filings</span>
+                </div>
+                <h4 class="text-sm font-semibold text-slate-900 mt-1">Discrepancy found in quarterly related-party transaction footnotes.</h4>
+                <p class="text-xs text-slate-500 mt-1">AI Validation Engine flagged discrepancy of ₹124 Cr between cash flow schedule and note 14 disclosures.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 2: ALL COMPANIES GRID ==================== -->
+      <section id="view-companies" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">NSE/BSE Listed Companies</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Explore the coverage universe and drill down into financials and AI reports.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <input 
+              type="text" 
+              placeholder="Filter by name/ticker..." 
+              id="companies-search" 
+              oninput="filterCompaniesGrid()"
+              class="border rounded-xl px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            />
+            <select id="companies-sector" onchange="filterCompaniesGrid()" class="border rounded-xl px-3 py-2 text-sm bg-white text-slate-700">
+              <option value="All">All Sectors</option>
+              <option value="Conglomerate">Conglomerate</option>
+              <option value="Banking">Banking</option>
+              <option value="IT Services">IT Services</option>
+              <option value="Automotive">Automotive</option>
+              <option value="FMCG">FMCG</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="companies-grid">
+          <!-- Card 1 -->
+          <div onclick="navigateToCompany('RELIANCE')" class="bg-white border border-slate-200 rounded-3xl p-6 glow-hover cursor-pointer space-y-4" data-ticker="RELIANCE" data-sector="Conglomerate">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full uppercase">NSE: RELIANCE</span>
+                <h3 class="font-bold text-lg font-heading text-slate-900 mt-2">Reliance Industries</h3>
+              </div>
+              <span class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm">R</span>
+            </div>
+            <p class="text-xs text-slate-500">Indian multinational conglomerate with businesses in energy, petrochemicals, retail, telecommunications, and textiles.</p>
+            <div class="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+              <div>
+                <span class="text-[10px] text-slate-400 block">PE TTM</span>
+                <span class="text-xs font-bold text-slate-800">26.8</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">ROCE</span>
+                <span class="text-xs font-bold text-slate-800">9.4%</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Cap (Cr)</span>
+                <span class="text-xs font-bold text-slate-800">₹19.7L</span>
+              </div>
+            </div>
+            <!-- AI Signal positive -->
+            <div class="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-xl flex items-center gap-2">
+              <i data-lucide="check-circle" class="h-4 w-4"></i> Retail growth drives positive thesis
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div onclick="navigateToCompany('HDFCBANK')" class="bg-white border border-slate-200 rounded-3xl p-6 glow-hover cursor-pointer space-y-4" data-ticker="HDFCBANK" data-sector="Banking">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full uppercase">NSE: HDFCBANK</span>
+                <h3 class="font-bold text-lg font-heading text-slate-900 mt-2">HDFC Bank Limited</h3>
+              </div>
+              <span class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm">H</span>
+            </div>
+            <p class="text-xs text-slate-500">Largest private sector bank in India by assets, offering banking, financial services, and retail credit solutions.</p>
+            <div class="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+              <div>
+                <span class="text-[10px] text-slate-400 block">PE TTM</span>
+                <span class="text-xs font-bold text-slate-800">18.2</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">ROCE</span>
+                <span class="text-xs font-bold text-slate-800">12.8%</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Cap (Cr)</span>
+                <span class="text-xs font-bold text-slate-800">₹11.7L</span>
+              </div>
+            </div>
+            <!-- AI Signal warning -->
+            <div class="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="h-4 w-4"></i> Margin pressure post-merger
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div onclick="navigateToCompany('TCS')" class="bg-white border border-slate-200 rounded-3xl p-6 glow-hover cursor-pointer space-y-4" data-ticker="TCS" data-sector="IT Services">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full uppercase">NSE: TCS</span>
+                <h3 class="font-bold text-lg font-heading text-slate-900 mt-2">Tata Consultancy Services</h3>
+              </div>
+              <span class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm">T</span>
+            </div>
+            <p class="text-xs text-slate-500">Leading global IT services, consulting, and business solutions organisation with headquarters in Mumbai.</p>
+            <div class="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+              <div>
+                <span class="text-[10px] text-slate-400 block">PE TTM</span>
+                <span class="text-xs font-bold text-slate-800">29.1</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">ROCE</span>
+                <span class="text-xs font-bold text-slate-800">48.2%</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Cap (Cr)</span>
+                <span class="text-xs font-bold text-slate-800">₹14.2L</span>
+              </div>
+            </div>
+            <div class="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-xl flex items-center gap-2">
+              <i data-lucide="check-circle" class="h-4 w-4"></i> Highest capital efficiency in IT sector
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div onclick="navigateToCompany('INFY')" class="bg-white border border-slate-200 rounded-3xl p-6 glow-hover cursor-pointer space-y-4" data-ticker="INFY" data-sector="IT Services">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full uppercase">NSE: INFY</span>
+                <h3 class="font-bold text-lg font-heading text-slate-900 mt-2">Infosys Limited</h3>
+              </div>
+              <span class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm">I</span>
+            </div>
+            <p class="text-xs text-slate-500">Indian multinational information technology company that provides business consulting, information technology and outsourcing services.</p>
+            <div class="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+              <div>
+                <span class="text-[10px] text-slate-400 block">PE TTM</span>
+                <span class="text-xs font-bold text-slate-800">24.5</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">ROCE</span>
+                <span class="text-xs font-bold text-slate-800">36.5%</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Cap (Cr)</span>
+                <span class="text-xs font-bold text-slate-800">₹6.4L</span>
+              </div>
+            </div>
+            <div class="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="h-4 w-4"></i> Guidance cut warnings on slower discretionary spend
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 3: COMPANY DETAIL VIEW (G3, G9) ==================== -->
+      <section id="view-company-detail" class="hidden space-y-6">
+        <!-- Back Navigation Breadcrumbs -->
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <a href="#companies" onclick="setRoute('companies')" class="hover:text-primary-600 font-medium transition">Companies</a>
+          <i data-lucide="chevron-right" class="h-3 w-3"></i>
+          <span class="font-semibold text-slate-850" id="detail-breadcrumb-ticker">RELIANCE</span>
+        </div>
+
+        <!-- NEW CONDENSED HEADER ZONE (G3) -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div class="space-y-2 flex-1">
+            <div class="flex items-center flex-wrap gap-2.5">
+              <h1 class="text-3xl font-bold font-heading text-slate-900" id="detail-company-title">Reliance Industries Ltd.</h1>
+              <span class="text-sm font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg uppercase" id="detail-company-ticker">RELIANCE</span>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded uppercase" id="detail-company-sector">Conglomerate</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 text-sm mt-1">
+              <!-- Live Price zone -->
+              <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-bold num-inr text-slate-900" id="detail-live-price">2,912.45</span>
+                <span class="text-xs font-bold text-emerald-600" id="detail-price-change">▲ +1.4% (Live)</span>
+              </div>
+              <div class="h-4 w-[1px] bg-slate-200"></div>
+              <div class="text-slate-500">Market Cap: <span class="font-bold text-slate-800" id="detail-market-cap">₹19.7L Cr</span></div>
+            </div>
+          </div>
+
+          <!-- Key financial ratios above the fold -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto bg-slate-50 rounded-2xl p-4 border border-slate-100">
+            <div class="text-center md:text-left">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase">P/E TTM</span>
+              <span class="text-base font-bold text-slate-800" id="detail-pe">26.8x</span>
+            </div>
+            <div class="text-center md:text-left">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase">ROCE</span>
+              <span class="text-base font-bold text-slate-800" id="detail-roce">9.4%</span>
+            </div>
+            <div class="text-center md:text-left">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase">Rev CAGR 3Y</span>
+              <span class="text-base font-bold text-slate-800" id="detail-cagr">14.2%</span>
+            </div>
+            <div class="text-center md:text-left">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase">Debt/Equity</span>
+              <span class="text-base font-bold text-slate-800" id="detail-de">0.38</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab selection (Filled pill design) -->
+        <div class="flex flex-wrap gap-2 bg-slate-200/60 p-1.5 rounded-2xl w-fit">
+          <button onclick="setDetailTab('ai')" id="tab-btn-ai" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition" style="background-color:#7c3aed; color:white;">AI Analysis</button>
+          <button onclick="setDetailTab('financials')" id="tab-btn-financials" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:text-slate-800">Financials</button>
+          <button onclick="setDetailTab('research')" id="tab-btn-research" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition text-slate-600 hover:text-slate-800">Inline Research</button>
+        </div>
+
+        <!-- TAB CONTENT 1: AI ANALYSIS (DEFAULT) -->
+        <div id="detail-tab-ai" class="space-y-6">
+          <!-- DISMISSABLE ANOMALY FLAGS BANNER (G3 - Count > 0) -->
+          <div id="anomaly-banner" class="bg-amber-50 border border-amber-200 rounded-3xl p-5 flex items-start justify-between gap-4">
+            <div class="flex gap-3">
+              <div class="h-10 w-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-amber-800">AI Validation Engine: 2 Critical Anomaly Flags Detected</h4>
+                <p class="text-xs text-amber-700 mt-1 leading-relaxed">
+                  Discrepancy found between reported cash flow and ledger schedules. Management credibility score reduced to 7.8/10.
+                </p>
+                <button onclick="setRoute('validation')" class="text-xs font-bold text-amber-900 hover:underline mt-2 flex items-center gap-1">
+                  Analyze anomalies in Validation Engine <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                </button>
+              </div>
+            </div>
+            <button onclick="dismissAnomalyBanner()" class="text-amber-400 hover:text-amber-600 transition">
+              <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+          </div>
+
+          <!-- AI Signal Dashboard Details -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="h-4.5 w-4.5 text-primary-500"></i>
+                <h3 class="text-lg font-bold font-heading text-slate-900">AI Consensus & Thesis Statement</h3>
+              </div>
+              <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100 text-slate-800 text-sm leading-relaxed">
+                <strong>Executive Summary:</strong> Reliance Industries represents a stable core holdings narrative, backed by resilient growth in retail operations. However, our agents note a negative cash generation divergence due to heavy capex on green energy infrastructures. Standard DCF valuation models imply a 12% valuation safety margin at current market levels.
+              </div>
+              
+              <div class="space-y-3">
+                <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider">Agent Bulletins</h4>
+                <div class="border rounded-2xl p-4 space-y-3 bg-slate-50/50">
+                  <div class="flex items-start gap-3">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0 font-bold text-[10px]">A1</span>
+                    <div class="text-xs text-slate-700">
+                      <strong>Retail Agent:</strong> EBITDA margins reached 8.4% (+30 bps YoY) driven by fashion and grocery formats. Highly positive.
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-amber-700 flex-shrink-0 font-bold text-[10px]">A2</span>
+                    <div class="text-xs text-slate-700">
+                      <strong>Jio Telecom Agent:</strong> Average revenue per user (ARPU) flattened at ₹181.70. High competitive headwinds; wait for 5G monetization details.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Health Scorecard -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+              <h3 class="text-base font-bold font-heading text-slate-900">Mental Model Scorecard</h3>
+              <div class="space-y-3 text-xs">
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="text-slate-500">Solvency & Coverage</span>
+                  <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">9.2 / 10</span>
+                </div>
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="text-slate-500">Earnings Quality</span>
+                  <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">8.5 / 10</span>
+                </div>
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="text-slate-500">Management Credibility</span>
+                  <span class="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">7.8 / 10</span>
+                </div>
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="text-slate-500">ESG Risk Score</span>
+                  <span class="font-bold text-red-650 bg-red-50 px-2 py-0.5 rounded">4.2 / 10 (Moderate)</span>
+                </div>
+              </div>
+              <button onclick="setRoute('valuation')" class="w-full text-center py-2.5 rounded-xl bg-primary-600 text-white font-semibold text-xs hover:bg-primary-700 transition">
+                Create DCF Model in Workbench
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: CONDENSED FINANCIALS VIEW (G3) -->
+        <div id="detail-tab-financials" class="hidden space-y-6 bg-white border border-slate-200 rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold font-heading text-slate-900">Condensed Financial Statement (Last 4 Quarters)</h3>
+            <span class="text-xs text-slate-400">Values in ₹ Crore (INR-native formatting)</span>
+          </div>
+
+          <!-- Revenue/Profit/Cashflow Sparkline Summary Card -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-4 space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Revenue</span>
+                  <div class="text-lg font-bold font-heading text-slate-800 mt-1">₹2,43,580 Cr</div>
+                </div>
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">▲ +9.2% YoY</span>
+              </div>
+              <!-- Sparkline SVG -->
+              <svg viewBox="0 0 200 45" class="w-full h-12">
+                <path d="M0,40 L30,35 L60,32 L90,38 L120,25 L150,20 L180,12 L200,8" fill="none" stroke="#7c3aed" stroke-width="2" />
+                <circle cx="200" cy="8" r="3" fill="#7c3aed" />
+              </svg>
+            </div>
+
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-4 space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Net Profit</span>
+                  <div class="text-lg font-bold font-heading text-slate-800 mt-1">₹18,950 Cr</div>
+                </div>
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">▲ +11.4% YoY</span>
+              </div>
+              <!-- Sparkline SVG -->
+              <svg viewBox="0 0 200 45" class="w-full h-12">
+                <path d="M0,35 L30,38 L60,32 L90,25 L120,30 L150,22 L180,18 L200,10" fill="none" stroke="#10b981" stroke-width="2" />
+                <circle cx="200" cy="10" r="3" fill="#10b981" />
+              </svg>
+            </div>
+
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-4 space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Cash Flow from Ops</span>
+                  <div class="text-lg font-bold font-heading text-slate-800 mt-1">₹32,480 Cr</div>
+                </div>
+                <span class="text-xs font-semibold text-red-650 bg-red-50 px-2 py-0.5 rounded">▼ -4.5% YoY</span>
+              </div>
+              <!-- Sparkline SVG -->
+              <svg viewBox="0 0 200 45" class="w-full h-12">
+                <path d="M0,15 L30,12 L60,18 L90,15 L120,22 L150,30 L180,24 L200,28" fill="none" stroke="#f59e0b" stroke-width="2" />
+                <circle cx="200" cy="28" r="3" fill="#f59e0b" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Accordion (Remaining Collapsed by default G3) -->
+          <div class="space-y-2 pt-4">
+            <details class="group border border-slate-150 rounded-2xl overflow-hidden bg-slate-50/30">
+              <summary class="flex justify-between items-center p-4 font-semibold text-xs text-slate-700 cursor-pointer hover:bg-slate-50 transition list-none">
+                <span>Detailed Profit & Loss Statement (TTM)</span>
+                <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+              </summary>
+              <div class="p-4 border-t border-slate-150 bg-white text-xs overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b text-slate-400 font-bold uppercase tracking-wider"><th class="pb-2">Metric</th><th class="pb-2">Q4FY26</th><th class="pb-2">Q3FY26</th><th class="pb-2">Q2FY26</th><th class="pb-2">Q1FY26</th></tr>
+                  </thead>
+                  <tbody class="divide-y text-slate-700">
+                    <tr><td class="py-2">Net Sales</td><td>₹2,43,580 Cr</td><td>₹2,38,900 Cr</td><td>₹2,32,450 Cr</td><td>₹2,28,400 Cr</td></tr>
+                    <tr><td class="py-2">Expenses</td><td>₹2,24,630 Cr</td><td>₹2,20,500 Cr</td><td>₹2,14,300 Cr</td><td>₹2,10,200 Cr</td></tr>
+                    <tr><td class="py-2">Operating Profit (EBITDA)</td><td>₹18,950 Cr</td><td>₹18,400 Cr</td><td>₹18,150 Cr</td><td>₹18,200 Cr</td></tr>
+                    <tr><td class="py-2">Interest Expense</td><td>₹5,210 Cr</td><td>₹5,180 Cr</td><td>₹5,240 Cr</td><td>₹5,120 Cr</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <details class="group border border-slate-150 rounded-2xl overflow-hidden bg-slate-50/30">
+              <summary class="flex justify-between items-center p-4 font-semibold text-xs text-slate-700 cursor-pointer hover:bg-slate-50 transition list-none">
+                <span>Balance Sheet & Solvency Schedules</span>
+                <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+              </summary>
+              <div class="p-4 border-t border-slate-150 bg-white text-xs">
+                Balance Sheet details are indexed under <code>silver_balance_sheet</code> schemas and are available for DCF mapping.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 3: INLINE RESEARCH TAB (G9) -->
+        <div id="detail-tab-research" class="hidden space-y-6">
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold font-heading text-slate-900">Recent Quarterly Concall AI Summaries</h3>
+              <a href="#research" onclick="navigateToResearchHubFromCompany()" class="text-xs font-semibold text-primary-600 hover:underline flex items-center gap-1">
+                Open in Research Hub <i data-lucide="external-link" class="h-3.5 w-3.5"></i>
+              </a>
+            </div>
+
+            <!-- List of 3 most recent concalls inline -->
+            <div class="space-y-4">
+              <details class="group border border-slate-100 rounded-2xl bg-slate-50 p-4" open>
+                <summary class="flex justify-between items-center font-bold text-xs text-slate-800 cursor-pointer list-none">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-primary-700 font-bold text-[10px]">Q4</span>
+                    <span>Q4 FY26 Conference Call AI Summary</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="mt-3 text-xs text-slate-600 leading-relaxed border-t pt-3 space-y-2">
+                  <p><strong>Guidance trajectories:</strong> Capital expenditure on Green energy solar gigafactory to run up to ₹32,000 Cr in FY27. Retail margins expected to stabilize around 8.5% level.</p>
+                  <p><strong>Key Analyst Q&A Insight:</strong> Disagreement between CEO and analyst regarding depreciation schedule rates for telecom assets.</p>
+                </div>
+              </details>
+
+              <details class="group border border-slate-100 rounded-2xl bg-slate-50 p-4">
+                <summary class="flex justify-between items-center font-bold text-xs text-slate-800 cursor-pointer list-none">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-primary-700 font-bold text-[10px]">Q3</span>
+                    <span>Q3 FY26 Conference Call AI Summary</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="mt-3 text-xs text-slate-600 leading-relaxed border-t pt-3">
+                  Summary for Q3 FY26 concall focusing on retail franchise expansion and petrochemical refining margins.
+                </div>
+              </details>
+
+              <details class="group border border-slate-100 rounded-2xl bg-slate-50 p-4">
+                <summary class="flex justify-between items-center font-bold text-xs text-slate-800 cursor-pointer list-none">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-primary-700 font-bold text-[10px]">Q2</span>
+                    <span>Q2 FY26 Conference Call AI Summary</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="mt-3 text-xs text-slate-600 leading-relaxed border-t pt-3">
+                  Summary for Q2 FY26 concall focusing on Jio 5G subscription tariff hikes and average revenue per user (ARPU) metrics.
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 4: SCREENER (ANALYSIS ENGINE - G4) ==================== -->
+      <section id="view-screener" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">Analysis Engine: Multi-Factor Screener</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Filter the NSE/BSE corporate universe using human-readable fundamental formulas.</p>
+          </div>
+          
+          <!-- Save Screen Action (G4) -->
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <input 
+              type="text" 
+              placeholder="Give this screen a name..." 
+              id="screen-name-input"
+              class="border rounded-xl px-3 py-2 text-xs w-full md:w-48 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            />
+            <button onclick="saveCurrentScreen()" class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 px-4 py-2.5 text-xs font-semibold text-white transition shadow-sm">
+              <i data-lucide="save" class="h-3.5 w-3.5"></i> Save Screen
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter builder layout -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b pb-4">
+            <h3 class="font-bold text-sm text-slate-800">Add Screening Parameters</h3>
+            <span class="text-xs text-slate-400 font-mono">1,480 companies matching active filters</span>
+          </div>
+
+          <!-- HUMAN READABLE METRIC PICKER (G4) -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Parameter 1: Metric Group -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Metric Group</label>
+              <select id="screener-metric-group" onchange="populateScreenerMetrics()" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-700">
+                <option value="Profitability">Profitability</option>
+                <option value="Growth">Growth</option>
+                <option value="Leverage">Leverage</option>
+                <option value="Valuation">Valuation</option>
+              </select>
+            </div>
+
+            <!-- Parameter 2: Human-readable Metric Selector with Descriptions -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Metric Variable</label>
+              <div class="relative">
+                <select id="screener-metric-name" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-700" onchange="updateMetricTooltip()">
+                  <!-- Populate dynamic variables -->
+                </select>
+              </div>
+              <!-- Tooltip placeholder (G4) -->
+              <span id="screener-metric-tooltip" class="text-[10px] text-primary-500 italic block mt-1">
+                Tooltip detail loads dynamically...
+              </span>
+            </div>
+
+            <!-- Parameter 3: Operator -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Condition</label>
+              <select id="screener-operator" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-700">
+                <option value=">">Greater than (&gt;)</option>
+                <option value="<">Less than (&lt;)</option>
+                <option value="=">Equals (=)</option>
+              </select>
+            </div>
+
+            <!-- Parameter 4: Threshold Value -->
+            <div class="space-y-1.5 flex items-end gap-2">
+              <div class="flex-1">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Value</label>
+                <input type="text" id="screener-value" placeholder="e.g. 15" class="border rounded-xl px-3 py-2 text-xs w-full bg-white" />
+              </div>
+              <button onclick="addScreeningFilter()" class="rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 p-2.5 transition text-slate-700">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active screening pills -->
+          <div class="flex flex-wrap gap-2 pt-2" id="screener-active-filters">
+            <!-- Filter tags will be added dynamically -->
+          </div>
+        </div>
+
+        <!-- Screener Results Table with Sparklines (G4) -->
+        <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-sm text-slate-800">Screener Output Universe</h3>
+            <button onclick="exportScreenerToCSV()" class="text-xs font-semibold text-primary-600 hover:underline flex items-center gap-1.5">
+              <i data-lucide="download" class="h-3.5 w-3.5"></i> Export CSV
+            </button>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                  <th class="px-6 py-3">Ticker</th>
+                  <th class="px-6 py-3">ROCE TTM</th>
+                  <th class="px-6 py-3">Revenue CAGR 3Y</th>
+                  <th class="px-6 py-3">Debt / Equity</th>
+                  <th class="px-6 py-3">PE TTM</th>
+                  <th class="px-6 py-3">Trend (60Q)</th>
+                  <th class="px-6 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y text-xs text-slate-700" id="screener-table-body">
+                <!-- RELIANCE -->
+                <tr class="hover:bg-slate-50/50 transition">
+                  <td class="px-6 py-4 font-bold text-slate-900">RELIANCE</td>
+                  <td class="px-6 py-4 font-medium text-slate-800">9.4%</td>
+                  <td class="px-6 py-4 text-emerald-600 font-semibold">▲ 14.2%</td>
+                  <td class="px-6 py-4">0.38</td>
+                  <td class="px-6 py-4">26.8x</td>
+                  <!-- Sparkline column -->
+                  <td class="px-6 py-4">
+                    <svg viewBox="0 0 100 20" class="w-20 h-6">
+                      <path d="M0,18 L15,16 L30,19 L45,12 L60,15 L75,8 L90,12 L100,5" fill="none" stroke="#7c3aed" stroke-width="1.5" />
+                    </svg>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button onclick="navigateToCompany('RELIANCE')" class="text-xs font-semibold text-primary-600 hover:underline">View Profile</button>
+                  </td>
+                </tr>
+                <!-- TCS -->
+                <tr class="hover:bg-slate-50/50 transition">
+                  <td class="px-6 py-4 font-bold text-slate-900">TCS</td>
+                  <td class="px-6 py-4 font-medium text-slate-800">48.2%</td>
+                  <td class="px-6 py-4 text-emerald-600 font-semibold">▲ 11.5%</td>
+                  <td class="px-6 py-4">0.02</td>
+                  <td class="px-6 py-4">29.1x</td>
+                  <td class="px-6 py-4">
+                    <svg viewBox="0 0 100 20" class="w-20 h-6">
+                      <path d="M0,15 L15,12 L30,10 L45,14 L60,8 L75,6 L90,5 L100,2" fill="none" stroke="#10b981" stroke-width="1.5" />
+                    </svg>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button onclick="navigateToCompany('TCS')" class="text-xs font-semibold text-primary-600 hover:underline">View Profile</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 5: QUESTION ENGINE (G5) ==================== -->
+      <section id="view-questions" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">Pre-Call Question Engine</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Generate and organize audit-grade probing question packs for upcoming corporate concalls.</p>
+          </div>
+          
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <!-- Company Selection for Packs -->
+            <select id="question-company-selector" class="border rounded-xl px-3 py-2 text-xs bg-white text-slate-700 focus:ring-2 focus:ring-primary-500">
+              <option value="RELIANCE">RELIANCE (Reliance Industries)</option>
+              <option value="HDFCBANK">HDFCBANK (HDFC Bank Ltd)</option>
+              <option value="TCS">TCS (Tata Consultancy Services)</option>
+              <option value="INFY">INFY (Infosys Limited)</option>
+            </select>
+            <button onclick="generateQuestionPack()" class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 px-4 py-2.5 text-xs font-semibold text-white transition shadow-sm">
+              <i data-lucide="sparkles" class="h-3.5 w-3.5"></i> Generate Pack
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- History Panel (G5 - last 5 generated packs) -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-1">
+            <h3 class="text-base font-bold font-heading text-slate-900 flex items-center gap-2">
+              <i data-lucide="history" class="h-4.5 w-4.5 text-slate-400"></i> Pack History
+            </h3>
+            <div class="space-y-2.5" id="question-history-list">
+              <!-- Dynamically populated or static defaults -->
+              <div onclick="loadQuestionPackHistory('RELIANCE', '2026-06-01')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-100 hover:bg-primary-50/10 cursor-pointer transition">
+                <span class="font-bold text-xs text-slate-800 block">RELIANCE</span>
+                <span class="text-[9px] text-slate-500">June 01, 2026 · 4 Questions</span>
+              </div>
+              <div onclick="loadQuestionPackHistory('HDFCBANK', '2026-05-28')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-100 hover:bg-primary-50/10 cursor-pointer transition">
+                <span class="font-bold text-xs text-slate-800 block">HDFCBANK</span>
+                <span class="text-[9px] text-slate-500">May 28, 2026 · 3 Questions</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pack view with draggable Cards (G5) -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-3">
+            <div class="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 class="text-base font-bold font-heading text-slate-900">Active Question Pack: <span id="question-pack-title">RELIANCE Q4</span></h3>
+                <p class="text-xs text-slate-400 mt-0.5">Drag questions or use buttons to reorder. Edit text directly in cards.</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="exportQuestionPack()" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-250 font-semibold text-xs transition">
+                  <i data-lucide="copy" class="h-3.5 w-3.5"></i> Export Pack
+                </button>
+                <button onclick="addNewQuestionCard()" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition">
+                  <i data-lucide="plus" class="h-3.5 w-3.5"></i> Add custom
+                </button>
+              </div>
+            </div>
+
+            <!-- List of Question Cards -->
+            <div class="space-y-3" id="question-cards-container">
+              <!-- Dynamically rendered draggable cards -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 6: RESEARCH HUB (G6) ==================== -->
+      <section id="view-research" class="hidden space-y-6">
+        <!-- COMPANY SELECTOR AT TOP (G6) -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">Corporate Research Hub</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Scope filings, concalls, and transcripts filtered by company.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-400 uppercase">Focus Company:</label>
+            <select id="research-company-filter" onchange="handleResearchCompanyFilter()" class="border rounded-xl px-3 py-2 text-xs bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-semibold">
+              <option value="All">All Companies</option>
+              <option value="RELIANCE">RELIANCE (Reliance Industries)</option>
+              <option value="HDFCBANK">HDFCBANK (HDFC Bank Ltd)</option>
+              <option value="TCS">TCS (Tata Consultancy Services)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3-tab layout (Concalls, Transcripts, Summaries) - scoping auto-filters everything (G6) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-3 space-y-2">
+            <div class="flex flex-col bg-white border border-slate-200 rounded-2xl p-2 space-y-1">
+              <button onclick="setResearchSubTab('summaries')" id="research-subtab-summaries" class="w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold bg-primary-600 text-white transition">
+                AI Call Summaries (Default)
+              </button>
+              <button onclick="setResearchSubTab('concalls')" id="research-subtab-concalls" class="w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-650 hover:bg-slate-100 transition">
+                Indexed Concall Audio
+              </button>
+              <button onclick="setResearchSubTab('transcripts')" id="research-subtab-transcripts" class="w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-650 hover:bg-slate-100 transition">
+                Raw Q&A Transcripts
+              </button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-9">
+            <!-- TAB 1: AI Summaries (Default - Expanded AI Concall summary instead of raw Q&A) -->
+            <div id="research-content-summaries" class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+              <h3 class="text-base font-bold font-heading text-slate-900">AI-Generated Quarterly Concall Summaries</h3>
+              
+              <div class="space-y-4" id="research-summaries-list">
+                <!-- RELIANCE card -->
+                <div class="border rounded-2xl p-5 bg-slate-50/50 space-y-3 research-item" data-company="RELIANCE">
+                  <div class="flex justify-between items-center border-b pb-2">
+                    <span class="font-bold text-xs text-slate-800">RELIANCE — Q4FY26 Concall Synthesis</span>
+                    <span class="text-[10px] text-slate-400">June 02, 2026</span>
+                  </div>
+                  <div class="text-xs text-slate-700 space-y-2 leading-relaxed">
+                    <p><strong>Revenue Trajectory:</strong> CapEx cycles in Jio 5G deployment are winding down. The focal capital allocation shift is directed towards the Solar Gigafactory commissioning in Gujarat by H2FY27.</p>
+                    <p><strong>Margin Pressures:</strong> O2C refining throughput margins compressed to $7.80/bbl due to volatile global oil feedstock rates. Offset by 8.4% steady EBITDA margins in retail division.</p>
+                  </div>
+                </div>
+
+                <!-- HDFC BANK card -->
+                <div class="border rounded-2xl p-5 bg-slate-50/50 space-y-3 research-item" data-company="HDFCBANK">
+                  <div class="flex justify-between items-center border-b pb-2">
+                    <span class="font-bold text-xs text-slate-800">HDFCBANK — Q4FY26 Concall Synthesis</span>
+                    <span class="text-[10px] text-slate-400">May 28, 2026</span>
+                  </div>
+                  <div class="text-xs text-slate-700 space-y-2 leading-relaxed">
+                    <p><strong>Net Interest Margins:</strong> post-merger funding consolidation continues to depress NIMs to 3.4%. Management targets recovery back to 3.8% over the next 4-6 quarters via wholesale deposit replacements.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: Audio files -->
+            <div id="research-content-concalls" class="hidden bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+              <h3 class="text-base font-bold font-heading text-slate-900 font-heading">Concall Audio Catalog</h3>
+              <div class="divide-y" id="research-concalls-list">
+                <div class="py-3 flex justify-between items-center research-item" data-company="RELIANCE">
+                  <div>
+                    <span class="font-bold text-xs text-slate-900">RELIANCE Q4 Concall Audio</span>
+                    <span class="text-[10px] text-slate-450 block">Length: 54 mins · June 01, 2026</span>
+                  </div>
+                  <button class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-primary-100 hover:text-primary-600 transition">
+                    <i data-lucide="play" class="h-4 w-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: Transcripts -->
+            <div id="research-content-transcripts" class="hidden bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+              <h3 class="text-base font-bold font-heading text-slate-900 font-heading">Transcript Database</h3>
+              <div class="space-y-4" id="research-transcripts-list">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 research-item" data-company="RELIANCE">
+                  <span class="font-bold text-xs text-slate-800">RELIANCE Q4 Transcript Snippet</span>
+                  <blockquote class="text-[11px] text-slate-650 italic border-l-2 pl-3 py-1 my-2">
+                    "Analyst: What is the peak capital outlay expected for the green energy solar gigafactory in FY27? CEO: We forecast peak annual run rate capex around 30,000 to 32,000 crores."
+                  </blockquote>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 7: VALUATION WORKBENCH (G7) ==================== -->
+      <section id="view-valuation" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">Valuation Workbench (Auto-Saving DCF)</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Build multi-scenario Discounted Cash Flow models with live browser state persistence.</p>
+          </div>
+          
+          <!-- Auto-save state indicator (G7) -->
+          <div class="flex items-center gap-2">
+            <span id="valuation-autosave-indicator" class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="h-3.5 w-3.5"></i> Auto-saved to LocalStorage
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Step configuration tabs -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2">
+            <div class="flex items-center justify-between border-b pb-3">
+              <h3 class="font-bold text-sm text-slate-800">Model Assumptions: Step 1 of 6</h3>
+              <span class="text-xs text-slate-400">Assumptions for RELIANCE</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">WACC (Weighted Avg Cost of Capital)</label>
+                <input type="text" id="val-wacc" value="11.2%" oninput="triggerValuationChange()" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-semibold" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Terminal Growth Rate</label>
+                <input type="text" id="val-terminal" value="4.5%" oninput="triggerValuationChange()" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-semibold" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Revenue Growth Year 1-3</label>
+                <input type="text" id="val-rev-growth" value="12.0%" oninput="triggerValuationChange()" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-semibold" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">EBITDA Margin Target</label>
+                <input type="text" id="val-margin" value="18.5%" oninput="triggerValuationChange()" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-semibold" />
+              </div>
+            </div>
+            
+            <div class="border-t pt-4 flex justify-between">
+              <span class="text-xs text-slate-400 italic" id="val-resume-text">Model initiated today.</span>
+              <button onclick="calculateValuation()" class="rounded-xl bg-primary-600 hover:bg-primary-700 px-4 py-2 text-xs font-semibold text-white transition">
+                Recalculate Output
+              </button>
+            </div>
+          </div>
+
+          <!-- Output summary with AI thesis (G7) -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <h3 class="text-base font-bold font-heading text-slate-900">Case Summary Output</h3>
+            
+            <div class="bg-slate-50 border rounded-2xl p-4 text-center space-y-2">
+              <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Implied Equity Valuation</span>
+              <div class="text-2xl font-bold text-indigo-700 font-heading num-inr" id="implied-val-output">3,260.40</div>
+              <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded" id="margin-safety-output">▲ +12% Safety Margin</span>
+            </div>
+
+            <!-- AI-Generated Thesis Paragraph Below weighted range (G7) -->
+            <div class="space-y-2 border-t pt-4">
+              <span class="text-[10px] font-bold text-primary-600 uppercase tracking-wider block flex items-center gap-1">
+                <i data-lucide="sparkles" class="h-3 w-3"></i> AI-Generated Investment Thesis
+              </span>
+              <p class="text-xs text-slate-600 leading-relaxed italic bg-indigo-50/30 border border-indigo-100/50 rounded-2xl p-3.5">
+                "At a valuation baseline of ₹3,260, Reliance Industries exhibits limited downside risk. The core retail CAGR of 15% secures EBITDA expansion. Upside risks include accelerated commissioning of green hydrogen facilities in Jamnagar; downside risks focus on elevated consumer leverage compressing Jio subscriber tariffs."
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 8: COMPARE PAGE (G8) ==================== -->
+      <section id="view-compare" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold font-heading text-slate-900">Side-by-Side Peer Comparison</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Compare key financials and valuations for up to 4 companies simultaneously.</p>
+          </div>
+
+          <!-- TIME PERIOD SELECTOR (G8 - Latest / FY2024 / FY2023) -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Analysis Period:</span>
+            <select id="compare-period-selector" onchange="updateComparisonMetrics()" class="border rounded-xl px-3 py-2 text-xs bg-white text-slate-700 focus:ring-2 focus:ring-primary-500">
+              <option value="Latest">Latest TTM</option>
+              <option value="FY2025">FY 2024-25</option>
+              <option value="FY2024">FY 2023-24</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-6">
+          <!-- Autocomplete comparison slots (G8) -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Slot 1 -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase block">Company Slot 1</label>
+              <div class="relative">
+                <input type="text" id="comp-slot-0" value="RELIANCE" oninput="showCompDropdown(0)" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-bold" />
+                <div id="comp-dropdown-0" class="absolute left-0 right-0 top-full mt-1 bg-white border rounded-xl shadow-lg z-30 hidden overflow-hidden divide-y text-xs">
+                  <div onclick="selectCompSlot(0, 'RELIANCE')" class="p-2.5 hover:bg-slate-50 cursor-pointer">RELIANCE</div>
+                  <div onclick="selectCompSlot(0, 'HDFCBANK')" class="p-2.5 hover:bg-slate-50 cursor-pointer">HDFCBANK</div>
+                  <div onclick="selectCompSlot(0, 'TCS')" class="p-2.5 hover:bg-slate-50 cursor-pointer">TCS</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Slot 2 -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase block">Company Slot 2</label>
+              <div class="relative">
+                <input type="text" id="comp-slot-1" value="HDFCBANK" oninput="showCompDropdown(1)" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-bold" />
+                <div id="comp-dropdown-1" class="absolute left-0 right-0 top-full mt-1 bg-white border rounded-xl shadow-lg z-30 hidden overflow-hidden divide-y text-xs">
+                  <div onclick="selectCompSlot(1, 'RELIANCE')" class="p-2.5 hover:bg-slate-50 cursor-pointer">RELIANCE</div>
+                  <div onclick="selectCompSlot(1, 'HDFCBANK')" class="p-2.5 hover:bg-slate-50 cursor-pointer">HDFCBANK</div>
+                  <div onclick="selectCompSlot(1, 'TCS')" class="p-2.5 hover:bg-slate-50 cursor-pointer">TCS</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slot 3 -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase block">Company Slot 3</label>
+              <div class="relative">
+                <input type="text" id="comp-slot-2" value="TCS" oninput="showCompDropdown(2)" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800 font-bold" />
+                <div id="comp-dropdown-2" class="absolute left-0 right-0 top-full mt-1 bg-white border rounded-xl shadow-lg z-30 hidden overflow-hidden divide-y text-xs">
+                  <div onclick="selectCompSlot(2, 'RELIANCE')" class="p-2.5 hover:bg-slate-50 cursor-pointer">RELIANCE</div>
+                  <div onclick="selectCompSlot(2, 'HDFCBANK')" class="p-2.5 hover:bg-slate-50 cursor-pointer">HDFCBANK</div>
+                  <div onclick="selectCompSlot(2, 'TCS')" class="p-2.5 hover:bg-slate-50 cursor-pointer">TCS</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slot 4 -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase block">Company Slot 4</label>
+              <div class="relative">
+                <input type="text" id="comp-slot-3" placeholder="Search and add..." oninput="showCompDropdown(3)" class="border rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-800" />
+                <div id="comp-dropdown-3" class="absolute left-0 right-0 top-full mt-1 bg-white border rounded-xl shadow-lg z-30 hidden overflow-hidden divide-y text-xs">
+                  <div onclick="selectCompSlot(3, 'RELIANCE')" class="p-2.5 hover:bg-slate-50 cursor-pointer">RELIANCE</div>
+                  <div onclick="selectCompSlot(3, 'HDFCBANK')" class="p-2.5 hover:bg-slate-50 cursor-pointer">HDFCBANK</div>
+                  <div onclick="selectCompSlot(3, 'TCS')" class="p-2.5 hover:bg-slate-50 cursor-pointer">TCS</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- peer comparisons metrics table -->
+          <div class="overflow-x-auto border rounded-2xl">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                  <th class="px-4 py-3">Metric</th>
+                  <th class="px-4 py-3" id="comp-header-0">RELIANCE</th>
+                  <th class="px-4 py-3" id="comp-header-1">HDFCBANK</th>
+                  <th class="px-4 py-3" id="comp-header-2">TCS</th>
+                  <th class="px-4 py-3" id="comp-header-3">—</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y text-slate-700" id="compare-table-body">
+                <!-- Data populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 9: VALIDATION ENGINE ==================== -->
+      <section id="view-validation" class="hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold font-heading text-slate-900">AI Validation Engine</h1>
+          <p class="text-slate-500 text-sm mt-0.5">Narrative validation metrics, discrepancy analytics, and audit logs.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2">
+            <h3 class="font-bold text-sm text-slate-800">Recent Discrepancy Detections</h3>
+            <div class="space-y-3">
+              <div class="border rounded-2xl p-4 bg-red-50/50 border-red-100 text-xs flex gap-3">
+                <span class="h-6 w-6 rounded-full bg-red-100 text-red-650 flex items-center justify-center flex-shrink-0 font-bold">!</span>
+                <div>
+                  <strong class="text-slate-900 block font-semibold">ADANIPORTS — Footnote related-party mismatch</strong>
+                  <p class="text-slate-600 mt-1 leading-relaxed">
+                    A delta of ₹124 Cr was identified between total related party loans declared in footnote schedule 14 vs the aggregated loan sum listed in key management receipts schedules.
+                  </p>
+                </div>
+              </div>
+
+              <div class="border rounded-2xl p-4 bg-amber-50/50 border-amber-100 text-xs flex gap-3">
+                <span class="h-6 w-6 rounded-full bg-amber-100 text-amber-650 flex items-center justify-center flex-shrink-0 font-bold">!</span>
+                <div>
+                  <strong class="text-slate-900 block font-semibold">RELIANCE — Telecom depreciation rates deviation</strong>
+                  <p class="text-slate-600 mt-1 leading-relaxed">
+                    Depreciation rate applied to fiber asset classes deviates from statutory standard guideline definitions, representing an earnings capitalization variance of ₹412 Cr.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <h3 class="text-base font-bold font-heading text-slate-900">Health Scores breakdown</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Average sector-wide validation indices. Anomalies are scanned automatically during quarterly runs.</p>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between border-b pb-2">
+                <span class="text-slate-500 font-medium">Energy & Utilities</span>
+                <span class="font-bold text-amber-600">8.1 / 10</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span class="text-slate-500 font-medium">IT Services</span>
+                <span class="font-bold text-emerald-600">9.8 / 10</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span class="text-slate-500 font-medium">Banking & Finance</span>
+                <span class="font-bold text-emerald-600">9.1 / 10</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 10: REPORTS ==================== -->
+      <section id="view-reports" class="hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold font-heading text-slate-900">Research Reports Hub</h1>
+          <p class="text-slate-500 text-sm mt-0.5">Upload custom broker research and read indexed transcripts.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <h3 class="font-bold text-sm text-slate-800">Upload Broker PDF / Memo</h3>
+            <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition cursor-pointer">
+              <i data-lucide="upload-cloud" class="h-10 w-10 text-slate-400 mx-auto"></i>
+              <span class="block font-bold text-slate-800 text-xs mt-3">Drag and drop research reports</span>
+              <span class="text-[10px] text-slate-500 mt-1 block">PDF formats supported (up to 50MB)</span>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <h3 class="font-bold text-sm text-slate-800">Recent Reports Database</h3>
+            <div class="space-y-2">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs flex justify-between items-center">
+                <div>
+                  <strong class="text-slate-800 font-semibold block">RELIANCE_Kotak_May2026.pdf</strong>
+                  <span class="text-[9px] text-slate-450">Kotak Institutional Equities · 12 pages</span>
+                </div>
+                <button class="text-primary-650 font-bold hover:underline">Preview</button>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs flex justify-between items-center">
+                <div>
+                  <strong class="text-slate-800 font-semibold block">TCS_MotilalOswal_Q4.pdf</strong>
+                  <span class="text-[9px] text-slate-450">Motilal Oswal Financial · 8 pages</span>
+                </div>
+                <button class="text-primary-650 font-bold hover:underline">Preview</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 11: UNIT ECONOMICS ==================== -->
+      <section id="view-unit-economics" class="hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold font-heading text-slate-900">Unit Economics Analyzer</h1>
+          <p class="text-slate-500 text-sm mt-0.5">Drill down into customer/location economics by operating division.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-6">
+          <h3 class="font-bold text-sm text-slate-800">Reliance Industries Division Breakdown</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-5 space-y-2">
+              <span class="text-xs font-bold text-primary-600 block">Jio Telecom Segment</span>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">ARPU (Monthly)</span>
+                <span class="font-bold text-slate-800">₹181.70</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Customer Acquisition Cost</span>
+                <span class="font-bold text-slate-800">₹420.00</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Chrun Rate (Monthly)</span>
+                <span class="font-bold text-emerald-600">0.9%</span>
+              </div>
+            </div>
+
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-5 space-y-2">
+              <span class="text-xs font-bold text-primary-600 block">Retail Segment</span>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Gross Margin per Store</span>
+                <span class="font-bold text-slate-800">8.4%</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Average Bill Size</span>
+                <span class="font-bold text-slate-800">₹1,120.00</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">New Stores Commissioned</span>
+                <span class="font-bold text-slate-850">412 (Q4)</span>
+              </div>
+            </div>
+
+            <div class="border border-slate-100 bg-slate-50/50 rounded-2xl p-5 space-y-2">
+              <span class="text-xs font-bold text-primary-600 block">Oil to Chemicals (O2C)</span>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Gross Refining Margin (GRM)</span>
+                <span class="font-bold text-slate-800">$7.80/bbl</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Feedstock Crude Rate</span>
+                <span class="font-bold text-slate-800">$84.20/bbl</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500">Utilization Rate</span>
+                <span class="font-bold text-emerald-600">98.2%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCREEN 12: ADMIN & DATA OPS (G11 - CTAs) ==================== -->
+      <section id="view-admin" class="hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold font-heading text-slate-900">Admin & Data Ops Center</h1>
+          <p class="text-slate-500 text-sm mt-0.5">Control pipeline states, configure ingestion health, and review audit logs (Restricted access).</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
+            <h3 class="font-bold text-sm text-slate-800">Ingestion Health Overview</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between pb-2 border-b">
+                <span class="text-slate-500">XBRL Parse Health</span>
+                <span class="font-bold text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded">99.8%</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b">
+                <span class="text-slate-500">Concalls PDF Parse</span>
+                <span class="font-bold text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded">100.0%</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b">
+                <span class="text-slate-500">Unmapped Footnote cells</span>
+                <span class="font-bold text-red-650 bg-red-50 px-2 py-0.5 rounded">42 Rows</span>
+              </div>
+            </div>
+            <!-- EMPTY STATE CTA EXAMPLE (G11) -->
+            <div class="bg-slate-50 border rounded-2xl p-4 text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Pipeline logs</span>
+              <p class="text-xs text-slate-500 mt-1">No custom pipelines executed this week.</p>
+              <button onclick="triggerIngest()" class="mt-3 inline-flex items-center gap-1 bg-primary-600 hover:bg-primary-750 text-white font-semibold text-xs px-3 py-1.5 rounded-xl transition">
+                <i data-lucide="play" class="h-3 w-3"></i> Trigger Ingest Run
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2">
+            <h3 class="font-bold text-sm text-slate-800">Medallion Data Pipeline States</h3>
+            <div class="relative pl-6 space-y-4">
+              <div class="absolute left-2.5 top-2 bottom-2 w-[1px] bg-slate-200"></div>
+              
+              <div class="relative">
+                <div class="absolute -left-5 top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm"></div>
+                <strong class="text-xs font-bold text-slate-800 block">Bronze Stage: Raw Files on Disk</strong>
+                <p class="text-[11px] text-slate-500 mt-0.5">Last fetched 15 mins ago. yfinance and BSE XBRL schemas matching.</p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-5 top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm"></div>
+                <strong class="text-xs font-bold text-slate-800 block">Silver Stage: Postgres Database Upserts</strong>
+                <p class="text-[11px] text-slate-500 mt-0.5">PostgreSQL decimal-checked records successfully updated. Delta load contains 1,210 lines.</p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-5 top-0.5 h-3.5 w-3.5 rounded-full bg-indigo-500 border-2 border-white shadow-sm animate-pulse"></div>
+                <strong class="text-xs font-bold text-slate-800 block">Gold Stage: Analytical Aggregated Views (Running)</strong>
+                <p class="text-[11px] text-slate-500 mt-0.5">Recalculating ROCE, CAGR, and generating AI summaries for newly ingested stocks.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ──────────────────────── TOAST / FLOATING NOTIFICATION ──────────────────────── -->
+  <div id="toast-notification" class="fixed bottom-20 md:bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white rounded-2xl px-5 py-3.5 shadow-2xl flex items-center gap-3 max-w-sm">
+    <div class="h-6 w-6 rounded-full bg-primary-650 flex items-center justify-center text-white" id="toast-icon-container">
+      <i data-lucide="check" class="h-4 w-4"></i>
+    </div>
+    <div class="text-xs font-medium" id="toast-message">Notification text.</div>
+  </div>
+
+  <!-- JS Logic -->
+  <script>
+    // State management
+    let activeRoute = 'dashboard';
+    let tourStep = 1;
+    let savedScreens = JSON.parse(localStorage.getItem('saved_screens')) || [
+      { name: 'High Growth ROCE', filters: 'ROCE > 20%, CAGR 3Y > 15%, Debt/Equity < 0.5' },
+      { name: 'Undervalued Leaders', filters: 'P/E < 20, Market Cap > ₹10,000 Cr, ROCE > 15%' }
+    ];
+    let selectedResearchCompany = 'All';
+    let questionCompany = 'RELIANCE';
+    let activeResearchSubTab = 'summaries';
+    
+    // Peer comparison state (G8)
+    let selectedCompareCompanies = ['RELIANCE', 'HDFCBANK', 'TCS', ''];
+    let activeComparePeriod = 'Latest';
+
+    // Mock Database for UI
+    const mockCompanies = {
+      RELIANCE: {
+        name: 'Reliance Industries Ltd.',
+        ticker: 'RELIANCE',
+        sector: 'Conglomerate',
+        price: '2,912.45',
+        change: '▲ +1.4%',
+        marketCap: '₹19.7L Cr',
+        pe: '26.8x',
+        roce: '9.4%',
+        cagr: '14.2%',
+        de: '0.38',
+        anomaliesCount: 2
+      },
+      HDFCBANK: {
+        name: 'HDFC Bank Limited',
+        ticker: 'HDFCBANK',
+        sector: 'Banking',
+        price: '1,542.20',
+        change: '▼ -0.7%',
+        marketCap: '₹11.7L Cr',
+        pe: '18.2x',
+        roce: '12.8%',
+        cagr: '10.5%',
+        de: '1.24',
+        anomaliesCount: 0
+      },
+      TCS: {
+        name: 'Tata Consultancy Services',
+        ticker: 'TCS',
+        sector: 'IT Services',
+        price: '3,842.10',
+        change: '▲ +0.5%',
+        marketCap: '₹14.2L Cr',
+        pe: '29.1x',
+        roce: '48.2%',
+        cagr: '11.5%',
+        de: '0.02',
+        anomaliesCount: 0
+      },
+      INFY: {
+        name: 'Infosys Limited',
+        ticker: 'INFY',
+        sector: 'IT Services',
+        price: '1,425.30',
+        change: '▼ -1.2%',
+        marketCap: '₹6.4L Cr',
+        pe: '24.5x',
+        roce: '36.5%',
+        cagr: '8.4%',
+        de: '0.05',
+        anomaliesCount: 1
+      }
+    };
+
+    // Question Packs databases (G5)
+    let questionPacks = {
+      RELIANCE: [
+        { id: 1, text: "Can management clarify why CapEx in telecom division continues to deviate from raw capital estimates by ₹450 Cr?", category: "Probing" },
+        { id: 2, text: "What are the core timelines for Solar Gigafactory commissioning in Jamnagar, and what is the expected capacity utilization in Year 1?", category: "Opening" },
+        { id: 3, text: "Given raw inventory growth in retail segment (+22% YoY), is there a risk of obsolescence write-downs in H1FY27?", category: "Probing" },
+        { id: 4, text: "How is the company mitigating geopolitical feedstock shocks on gross refining margins (GRM)?", category: "Follow-up" }
+      ],
+      HDFCBANK: [
+        { id: 1, text: "What is the timeline for cost-to-income consolidation following the HDFC Ltd merger?", category: "Opening" },
+        { id: 2, text: "Can you detail the wholesale deposit run-rates needed to replace high-cost market borrowings?", category: "Probing" },
+        { id: 3, text: "How is the retail asset growth portfolio adjusting to the new statutory liquidity ratio (SLR) constraints?", category: "Follow-up" }
+      ],
+      TCS: [
+        { id: 1, text: "Discretionary spend contracts in the US banking sector seem to be slowing. Are we seeing deal cycle extensions?", category: "Probing" },
+        { id: 2, text: "What margin targets do we hold for the newly won high-scale public sector UK contract?", category: "Opening" }
+      ],
+      INFY: [
+        { id: 1, text: "Why was the discretionary guidance cut by 50 bps despite winning 3 large deals?", category: "Probing" }
+      ]
+    };
+
+    // Human Readable Metric Picker categories & tooltips (G4)
+    const metricGroups = {
+      Profitability: [
+        { key: 'roce_ttm', label: 'ROCE TTM', desc: 'Return on Capital Employed, trailing 12 months. Measures profit efficiency on long-term funds.' },
+        { key: 'ebitda_margin', label: 'EBITDA Margin', desc: 'Earnings before interest, taxes, depreciation, and amortization margin. Operational health.' },
+        { key: 'roe_ttm', label: 'ROE TTM', desc: 'Return on Equity. Measures net income returned as a percentage of shareholders equity.' }
+      ],
+      Growth: [
+        { key: 'revenue_cagr_3y', label: 'Revenue CAGR 3Y', desc: 'Compound Annual Growth Rate of revenue over the last 3 financial years.' },
+        { key: 'ebitda_cagr_3y', label: 'EBITDA CAGR 3Y', desc: 'Compound Annual Growth Rate of operational EBITDA over 3 years.' }
+      ],
+      Leverage: [
+        { key: 'debt_to_equity', label: 'Debt to Equity', desc: 'Total Debt divided by Shareholders Equity. Key solvency marker (< 0.5 is optimal).' },
+        { key: 'interest_coverage', label: 'Interest Coverage Ratio', desc: 'EBIT divided by interest expenses. Shows capability of paying debts.' }
+      ],
+      Valuation: [
+        { key: 'pe_ttm', label: 'P/E TTM', desc: 'Price-to-Earnings ratio, trailing 12 months. Benchmark valuation metric.' },
+        { key: 'pb_ratio', label: 'P/B Ratio', desc: 'Price-to-Book ratio. Assets value comparison, useful for banking shares.' }
+      ]
+    };
+
+    // On Init
+    window.addEventListener('DOMContentLoaded', () => {
+      // Setup icons
+      lucide.createIcons();
+      
+      // Handle Keyboard Cmd+K/Ctrl+K (G1)
+      window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          toggleCommandPalette(true);
+        }
+        if (e.key === 'Escape') {
+          toggleCommandPalette(false);
+          skipOnboarding();
+        }
+      });
+      
+      // Init Screener dropdowns
+      populateScreenerMetrics();
+      
+      // Init Active route
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById('view-' + hash)) {
+        setRoute(hash);
+      } else {
+        setRoute('dashboard');
+      }
+      
+      // Render Question cards
+      renderQuestionCards();
+      
+      // Update Peer comparison table (G8)
+      updateComparisonMetrics();
+
+      // Setup onboarding step 1
+      tourStep = 1;
+      updateTourStep();
+    });
+
+    // NAVIGATION ROUTING
+    function setRoute(route) {
+      activeRoute = route;
+      
+      // Hide all routes
+      document.querySelectorAll('main > section').forEach(sec => {
+        sec.classList.add('hidden');
+      });
+      
+      // Show active route
+      const targetSec = document.getElementById('view-' + route);
+      if (targetSec) {
+        targetSec.classList.remove('hidden');
+      }
+      
+      // Update breadcrumbs
+      const friendlyNames = {
+        'dashboard': 'Dashboard',
+        'companies': 'Companies List',
+        'company-detail': 'Company Detail',
+        'screener': 'Analysis Engine Screener',
+        'validation': 'Validation Engine',
+        'research': 'Research Hub',
+        'questions': 'Question Engine',
+        'reports': 'Reports Hub',
+        'valuation': 'Valuation Workbench',
+        'unit-economics': 'Unit Economics',
+        'compare': 'Compare Peer Grid',
+        'admin': 'Admin Control Room'
+      };
+      
+      document.getElementById('breadcrumb-current').textContent = friendlyNames[route] || route;
+      
+      // Update sidebar visual states
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('sidebar-active');
+        item.classList.add('sidebar-inactive');
+      });
+      const activeNav = document.getElementById('nav-' + route);
+      if (activeNav) {
+        activeNav.classList.add('sidebar-active');
+        activeNav.classList.remove('sidebar-inactive');
+      }
+
+      // Update mobile visual states
+      document.querySelectorAll('[id^="mob-"]').forEach(item => {
+        if (item.id === 'mob-more') return;
+        item.classList.remove('text-primary-500');
+        item.classList.add('text-slate-400');
+      });
+      const mobNav = document.getElementById('mob-' + route);
+      if (mobNav) {
+        mobNav.classList.add('text-primary-500');
+        mobNav.classList.remove('text-slate-400');
+      }
+      
+      // Auto-focus search palette if page is companies
+      if (route === 'companies') {
+        document.getElementById('companies-search').focus();
+      }
+    }
+
+    // LEADERBOARD COLLAPSE TOGGLE (G2)
+    function toggleLeaderboard() {
+      const content = document.getElementById('leaderboard-content');
+      const arrow = document.getElementById('leaderboard-arrow');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        content.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // COMMAND PALETTE ACTIONS (G1)
+    function toggleCommandPalette(show) {
+      const palette = document.getElementById('command-palette');
+      const searchInput = document.getElementById('cmd-search-input');
+      if (show) {
+        palette.classList.remove('hidden');
+        searchInput.focus();
+        searchInput.value = '';
+        handleCommandPaletteSearch(); // show default view
+      } else {
+        palette.classList.add('hidden');
+      }
+    }
+    
+    function handleCommandPaletteSearch() {
+      const query = document.getElementById('cmd-search-input').value.toUpperCase().trim();
+      const defaultView = document.getElementById('cmd-default-view');
+      const filteredView = document.getElementById('cmd-filtered-view');
+      const filteredList = document.getElementById('cmd-filtered-list');
+      
+      if (!query) {
+        defaultView.classList.remove('hidden');
+        filteredView.classList.add('hidden');
+        return;
+      }
+      
+      defaultView.classList.add('hidden');
+      filteredView.classList.remove('hidden');
+      filteredList.innerHTML = '';
+      
+      // Match against companies database
+      let matches = 0;
+      Object.keys(mockCompanies).forEach(symbol => {
+        const company = mockCompanies[symbol];
+        if (symbol.includes(query) || company.name.toUpperCase().includes(query) || company.sector.toUpperCase().includes(query)) {
+          matches++;
+          filteredList.innerHTML += `
+            <div onclick="navigateToCompany('${symbol}')" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+              <div class="flex items-center gap-3">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600 font-bold text-xs">${symbol[0]}</span>
+                <div>
+                  <span class="font-bold text-slate-900">${symbol}</span>
+                  <span class="text-xs text-slate-500 ml-2">${company.name}</span>
+                </div>
+              </div>
+              <span class="text-xs text-slate-450 bg-slate-100 px-2 py-0.5 rounded">${company.sector}</span>
+            </div>
+          `;
+        }
+      });
+      
+      // Match against tool keywords
+      const tools = [
+        { label: 'Screener Engine', route: 'screener', desc: 'Create complex filters' },
+        { label: 'Valuation DCF Workbench', route: 'valuation', desc: 'Autosave financial models' },
+        { label: 'Validation Auditor Engine', route: 'validation', desc: 'Review corporate accounting anomalies' },
+        { label: 'Research Hub', route: 'research', desc: 'Indexed Concalls and transcripts' },
+        { label: 'Compare Peers', route: 'compare', desc: 'Side-by-side radar analysis' },
+        { label: 'Onboarding System Tour', action: 'tour', desc: 'Restart guided platform onboarding' }
+      ];
+      
+      tools.forEach(t => {
+        if (t.label.toUpperCase().includes(query) || t.desc.toUpperCase().includes(query)) {
+          matches++;
+          filteredList.innerHTML += `
+            <div onclick="${t.action ? 'toggleOnboarding()' : `navigateToTool('${t.route}')`}" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+              <div class="flex items-center gap-3">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"><i data-lucide="compass" class="h-4 w-4"></i></span>
+                <div>
+                  <span class="font-bold text-slate-900">${t.label}</span>
+                  <span class="text-xs text-slate-500 ml-2">${t.desc}</span>
+                </div>
+              </div>
+              <span class="text-xs text-slate-450 bg-indigo-50 border px-2 py-0.5 rounded text-indigo-650">Tool</span>
+            </div>
+          `;
+        }
+      });
+      
+      lucide.createIcons();
+      
+      if (matches === 0) {
+        filteredList.innerHTML = `<div class="p-6 text-center text-xs text-slate-450">No matches found for "${query}"</div>`;
+      }
+    }
+    
+    function navigateToCompany(symbol) {
+      toggleCommandPalette(false);
+      
+      // Load company profile values
+      const c = mockCompanies[symbol];
+      if (!c) return;
+      
+      document.getElementById('detail-breadcrumb-ticker').textContent = symbol;
+      document.getElementById('detail-company-title').textContent = c.name;
+      document.getElementById('detail-company-ticker').textContent = symbol;
+      document.getElementById('detail-company-sector').textContent = c.sector;
+      document.getElementById('detail-live-price').textContent = c.price;
+      document.getElementById('detail-price-change').textContent = c.change + ' (Live)';
+      document.getElementById('detail-market-cap').textContent = c.marketCap;
+      document.getElementById('detail-pe').textContent = c.pe;
+      document.getElementById('detail-roce').textContent = c.roce;
+      document.getElementById('detail-cagr').textContent = c.cagr;
+      document.getElementById('detail-de').textContent = c.de;
+      
+      // If company has anomalies show banner, else hide (G3)
+      const anomalyBanner = document.getElementById('anomaly-banner');
+      if (c.anomaliesCount > 0) {
+        anomalyBanner.classList.remove('hidden');
+      } else {
+        anomalyBanner.classList.add('hidden');
+      }
+      
+      // Scope Inline Research Tab dynamically
+      setDetailTab('ai');
+      setRoute('company-detail');
+      
+      // Trigger onboarding step 2 if active
+      if (tourStep === 1) {
+        tourStep = 2;
+        updateTourStep();
+      }
+    }
+    
+    function navigateToTool(route) {
+      toggleCommandPalette(false);
+      setRoute(route);
+    }
+    
+    function executeQuickAction(action) {
+      toggleCommandPalette(false);
+      setRoute(action);
+    }
+
+    // COMPANY DETAIL TAB NAVIGATION (G3, G9)
+    function setDetailTab(tab) {
+      document.getElementById('detail-tab-ai').classList.add('hidden');
+      document.getElementById('detail-tab-financials').classList.add('hidden');
+      document.getElementById('detail-tab-research').classList.add('hidden');
+      
+      document.getElementById('tab-btn-ai').style.backgroundColor = 'transparent';
+      document.getElementById('tab-btn-ai').style.color = '#475569';
+      document.getElementById('tab-btn-financials').style.backgroundColor = 'transparent';
+      document.getElementById('tab-btn-financials').style.color = '#475569';
+      document.getElementById('tab-btn-research').style.backgroundColor = 'transparent';
+      document.getElementById('tab-btn-research').style.color = '#475569';
+      
+      document.getElementById('detail-tab-' + tab).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-btn-' + tab);
+      activeBtn.style.backgroundColor = '#7c3aed';
+      activeBtn.style.color = 'white';
+    }
+    
+    function dismissAnomalyBanner() {
+      document.getElementById('anomaly-banner').classList.add('hidden');
+      showToast("Anomaly banner dismissed");
+    }
+
+    // SCREENER FACTOR PICKER (G4)
+    function populateScreenerMetrics() {
+      const group = document.getElementById('screener-metric-group').value;
+      const metricSelect = document.getElementById('screener-metric-name');
+      metricSelect.innerHTML = '';
+      
+      const metrics = metricGroups[group] || [];
+      metrics.forEach(m => {
+        metricSelect.innerHTML += `<option value="${m.key}">${m.label}</option>`;
+      });
+      
+      updateMetricTooltip();
+    }
+    
+    function updateMetricTooltip() {
+      const group = document.getElementById('screener-metric-group').value;
+      const key = document.getElementById('screener-metric-name').value;
+      const tooltip = document.getElementById('screener-metric-tooltip');
+      
+      const metrics = metricGroups[group] || [];
+      const activeMetric = metrics.find(m => m.key === key);
+      
+      if (activeMetric) {
+        tooltip.textContent = activeMetric.label + ": " + activeMetric.desc;
+      }
+    }
+    
+    function addScreeningFilter() {
+      const group = document.getElementById('screener-metric-group').value;
+      const key = document.getElementById('screener-metric-name').value;
+      const op = document.getElementById('screener-operator').value;
+      const val = document.getElementById('screener-value').value.trim();
+      
+      if (!val) {
+        showToast("Please enter a filter value", true);
+        return;
+      }
+      
+      const metrics = metricGroups[group] || [];
+      const activeMetric = metrics.find(m => m.key === key);
+      
+      const container = document.getElementById('screener-active-filters');
+      const filterId = 'filt-' + Date.now();
+      container.innerHTML += `
+        <span id="${filterId}" class="inline-flex items-center gap-1 text-xs bg-indigo-50 text-primary-700 px-3 py-1.5 rounded-xl border border-indigo-100 font-semibold group hover:bg-red-50 hover:text-red-600 hover:border-red-100 cursor-pointer transition" onclick="removeScreenerFilter('${filterId}')">
+          ${activeMetric.label} ${op} ${val}
+          <i data-lucide="x" class="h-3.5 w-3.5 text-primary-400 group-hover:text-red-500"></i>
+        </span>
+      `;
+      lucide.createIcons();
+      showToast(`Added filter: ${activeMetric.label} ${op} ${val}`);
+      
+      // Trigger onboarding step 3 if active
+      if (tourStep === 2) {
+        tourStep = 3;
+        updateTourStep();
+      }
+    }
+    
+    function removeScreenerFilter(id) {
+      document.getElementById(id).remove();
+      showToast("Filter removed");
+    }
+    
+    function saveCurrentScreen() {
+      const name = document.getElementById('screen-name-input').value.trim();
+      if (!name) {
+        showToast("Please enter a name for the saved screen", true);
+        return;
+      }
+      
+      // Accumulate active filters from HTML DOM
+      let filterTexts = [];
+      document.getElementById('screener-active-filters').querySelectorAll('span').forEach(span => {
+        filterTexts.push(span.innerText.trim());
+      });
+      
+      if (filterTexts.length === 0) {
+        showToast("Please add at least one screening parameter before saving", true);
+        return;
+      }
+      
+      const filters = filterTexts.join(', ');
+      
+      savedScreens.unshift({ name, filters });
+      localStorage.setItem('saved_screens', JSON.stringify(savedScreens));
+      
+      // Update UI Lists
+      updateSavedScreensLists();
+      
+      document.getElementById('screen-name-input').value = '';
+      showToast(`Screen "${name}" saved to your Analyst Dashboard!`);
+    }
+    
+    function updateSavedScreensLists() {
+      // 1. Dashboard saved screens
+      const list = document.getElementById('saved-screens-dashboard-list');
+      if (list) {
+        list.innerHTML = '';
+        savedScreens.slice(0, 3).forEach(screen => {
+          list.innerHTML += `
+            <div onclick="resumeSavedScreen('${screen.name}')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer transition">
+              <span class="font-semibold text-xs text-slate-800 block">${screen.name}</span>
+              <span class="text-[10px] text-slate-500">${screen.filters}</span>
+            </div>
+          `;
+        });
+      }
+    }
+    
+    function resumeSavedScreen(name) {
+      const screen = savedScreens.find(s => s.name === name);
+      if (!screen) return;
+      
+      setRoute('screener');
+      
+      // Load filters into screener UI
+      const container = document.getElementById('screener-active-filters');
+      container.innerHTML = '';
+      
+      const filterItems = screen.filters.split(', ');
+      filterItems.forEach(item => {
+        const id = 'filt-' + Math.floor(Math.random() * 100000);
+        container.innerHTML += `
+          <span id="${id}" class="inline-flex items-center gap-1 text-xs bg-indigo-50 text-primary-700 px-3 py-1.5 rounded-xl border border-indigo-100 font-semibold group hover:bg-red-50 hover:text-red-600 hover:border-red-100 cursor-pointer transition" onclick="removeScreenerFilter('${id}')">
+            ${item}
+            <i data-lucide="x" class="h-3.5 w-3.5 text-primary-400 group-hover:text-red-500"></i>
+          </span>
+        `;
+      });
+      lucide.createIcons();
+      showToast(`Loaded Saved Screen: "${name}"`);
+    }
+
+    // QUESTION ENGINE PACK MANAGEMENT (G5)
+    function generateQuestionPack() {
+      const company = document.getElementById('question-company-selector').value;
+      questionCompany = company;
+      
+      document.getElementById('question-pack-title').textContent = company + ' Q4FY26 Concall Pack';
+      
+      // Render
+      renderQuestionCards();
+      
+      // Save to history (last 5 generated packs)
+      saveQuestionPackHistory(company);
+      
+      showToast(`Generated pre-call question pack for ${company}`);
+    }
+    
+    function renderQuestionCards() {
+      const container = document.getElementById('question-cards-container');
+      container.innerHTML = '';
+      
+      const questions = questionPacks[questionCompany] || [];
+      
+      if (questions.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center border rounded-2xl bg-slate-50">
+            <p class="text-xs text-slate-400">No questions generated yet. Choose a company and hit Generate Pack.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      questions.forEach((q, idx) => {
+        let catColor = "bg-primary-50 text-primary-700 border-primary-100";
+        if (q.category === 'Probing') catColor = "bg-amber-50 text-amber-700 border-amber-100";
+        if (q.category === 'Follow-up') catColor = "bg-emerald-50 text-emerald-700 border-emerald-100";
+        
+        container.innerHTML += `
+          <div class="draggable-card border border-slate-100 hover:border-primary-200 bg-slate-50/50 p-4 rounded-2xl transition flex items-start justify-between gap-4" draggable="true" ondragstart="handleDragStart(event, ${idx})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${idx})">
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center gap-2">
+                <!-- Reordering control arrows -->
+                <button onclick="moveQuestion(${idx}, -1)" class="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-650"><i data-lucide="arrow-up" class="h-3 w-3"></i></button>
+                <button onclick="moveQuestion(${idx}, 1)" class="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-650"><i data-lucide="arrow-down" class="h-3 w-3"></i></button>
+                
+                <span class="text-[10px] font-bold uppercase border px-2 py-0.5 rounded-full ${catColor}">${q.category}</span>
+              </div>
+              <textarea onchange="editQuestionInPlace(${idx}, this.value)" class="w-full text-xs text-slate-700 font-semibold bg-transparent border-0 focus:bg-white focus:ring-1 focus:ring-primary-400 focus:outline-none rounded p-1 resize-y" rows="2">${q.text}</textarea>
+            </div>
+            <button onclick="deleteQuestion(${idx})" class="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition">
+              <i data-lucide="trash-2" class="h-4.5 w-4.5"></i>
+            </button>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+    
+    function deleteQuestion(idx) {
+      questionPacks[questionCompany].splice(idx, 1);
+      renderQuestionCards();
+      showToast("Question deleted from pack");
+    }
+    
+    function editQuestionInPlace(idx, val) {
+      questionPacks[questionCompany][idx].text = val;
+      showToast("Question updated");
+    }
+    
+    function addNewQuestionCard() {
+      if (!questionPacks[questionCompany]) {
+        questionPacks[questionCompany] = [];
+      }
+      questionPacks[questionCompany].push({
+        id: Date.now(),
+        text: "Click to write a customized compliance question...",
+        category: "Probing"
+      });
+      renderQuestionCards();
+      showToast("Blank question card added");
+    }
+    
+    function exportQuestionPack() {
+      const questions = questionPacks[questionCompany] || [];
+      if (questions.length === 0) {
+        showToast("No questions available to export", true);
+        return;
+      }
+      
+      let textOutput = `InvestIQ Pre-Call Question Pack: ${questionCompany} Q4\n`;
+      textOutput += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+      
+      questions.forEach((q, idx) => {
+        textOutput += `${idx + 1}. [${q.category}] ${q.text}\n`;
+      });
+      
+      navigator.clipboard.writeText(textOutput);
+      showToast("Question pack copied to clipboard!");
+    }
+    
+    // Drag and Drop reordering APIs
+    let dragIndex = null;
+    function handleDragStart(e, idx) {
+      dragIndex = idx;
+    }
+    function handleDragOver(e) {
+      e.preventDefault();
+    }
+    function handleDrop(e, targetIdx) {
+      e.preventDefault();
+      if (dragIndex === null || dragIndex === targetIdx) return;
+      const item = questionPacks[questionCompany].splice(dragIndex, 1)[0];
+      questionPacks[questionCompany].splice(targetIdx, 0, item);
+      renderQuestionCards();
+      showToast("Reordered questions");
+    }
+
+    function moveQuestion(idx, direction) {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= questionPacks[questionCompany].length) return;
+      const item = questionPacks[questionCompany].splice(idx, 1)[0];
+      questionPacks[questionCompany].splice(targetIdx, 0, item);
+      renderQuestionCards();
+    }
+
+    function saveQuestionPackHistory(company) {
+      const list = document.getElementById('question-history-list');
+      const date = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+      const count = questionPacks[company].length;
+      
+      list.innerHTML = `
+        <div onclick="loadQuestionPackHistory('${company}', '${date}')" class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary-100 hover:bg-primary-50/10 cursor-pointer transition">
+          <span class="font-bold text-xs text-slate-800 block">${company}</span>
+          <span class="text-[9px] text-slate-500">${date} · ${count} Questions</span>
+        </div>
+      ` + list.innerHTML;
+    }
+    
+    function loadQuestionPackHistory(company, date) {
+      questionCompany = company;
+      document.getElementById('question-company-selector').value = company;
+      document.getElementById('question-pack-title').textContent = company + ' Concall Pack (Restored)';
+      renderQuestionCards();
+      showToast(`Restored pack for ${company} generated on ${date}`);
+    }
+
+    // RESEARCH HUB SEARCH / FILTER (G6)
+    function handleResearchCompanyFilter() {
+      const company = document.getElementById('research-company-filter').value;
+      selectedResearchCompany = company;
+      
+      // Auto-filter all 3 tab lists (G6)
+      const items = document.querySelectorAll('.research-item');
+      items.forEach(item => {
+        const itemCompany = item.getAttribute('data-company');
+        if (company === 'All' || itemCompany === company) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+      
+      showToast(`Scoped Research Hub content to: ${company === 'All' ? 'All Companies' : company}`);
+    }
+    
+    function setResearchSubTab(tab) {
+      activeResearchSubTab = tab;
+      
+      document.getElementById('research-content-summaries').classList.add('hidden');
+      document.getElementById('research-content-concalls').classList.add('hidden');
+      document.getElementById('research-content-transcripts').classList.add('hidden');
+      
+      document.getElementById('research-subtab-summaries').classList.remove('bg-primary-600', 'text-white');
+      document.getElementById('research-subtab-summaries').classList.add('text-slate-650', 'hover:bg-slate-100');
+      document.getElementById('research-subtab-concalls').classList.remove('bg-primary-600', 'text-white');
+      document.getElementById('research-subtab-concalls').classList.add('text-slate-650', 'hover:bg-slate-100');
+      document.getElementById('research-subtab-transcripts').classList.remove('bg-primary-600', 'text-white');
+      document.getElementById('research-subtab-transcripts').classList.add('text-slate-650', 'hover:bg-slate-100');
+      
+      document.getElementById('research-content-' + tab).classList.remove('hidden');
+      document.getElementById('research-subtab-' + tab).classList.add('bg-primary-600', 'text-white');
+      document.getElementById('research-subtab-' + tab).classList.remove('text-slate-650', 'hover:bg-slate-100');
+    }
+    
+    function navigateToResearch(symbol) {
+      setRoute('research');
+      document.getElementById('research-company-filter').value = symbol;
+      handleResearchCompanyFilter();
+    }
+    
+    function navigateToResearchHubFromCompany() {
+      const symbol = document.getElementById('detail-company-ticker').textContent;
+      setRoute('research');
+      document.getElementById('research-company-filter').value = symbol;
+      handleResearchCompanyFilter();
+    }
+
+    // VALUATION WORKBENCH AUTO-SAVE STATE (G7)
+    let autoSaveTimeout = null;
+    function triggerValuationChange() {
+      const indicator = document.getElementById('valuation-autosave-indicator');
+      indicator.innerHTML = `<i data-lucide="refresh-cw" class="h-3.5 w-3.5 animate-spin"></i> Saving changes...`;
+      indicator.classList.remove('text-emerald-600', 'bg-emerald-50', 'border-emerald-100');
+      indicator.classList.add('text-amber-600', 'bg-amber-50', 'border-amber-100');
+      lucide.createIcons();
+      
+      clearTimeout(autoSaveTimeout);
+      autoSaveTimeout = setTimeout(() => {
+        // Save current assumptions to localStorage (G7)
+        const wacc = document.getElementById('val-wacc').value;
+        const term = document.getElementById('val-terminal').value;
+        const growth = document.getElementById('val-rev-growth').value;
+        const margin = document.getElementById('val-margin').value;
+        
+        const assumptions = { wacc, term, growth, margin, date: new Date().toLocaleTimeString() };
+        localStorage.setItem('valuation_RELIANCE', JSON.stringify(assumptions));
+        
+        indicator.innerHTML = `<i data-lucide="check-circle" class="h-3.5 w-3.5"></i> Saved to LocalStorage`;
+        indicator.classList.remove('text-amber-600', 'bg-amber-50', 'border-amber-100');
+        indicator.classList.add('text-emerald-600', 'bg-emerald-50', 'border-emerald-100');
+        document.getElementById('val-resume-text').textContent = "Autosaved at " + assumptions.date;
+        lucide.createIcons();
+        
+        calculateValuation();
+      }, 1000);
+    }
+    
+    function calculateValuation() {
+      const wacc = parseFloat(document.getElementById('val-wacc').value) || 10;
+      const term = parseFloat(document.getElementById('val-terminal').value) || 4;
+      const impliedValOutput = document.getElementById('implied-val-output');
+      const safetyOutput = document.getElementById('margin-safety-output');
+      
+      // Run mock DCF formulation based on inputs
+      let baseVal = 2912.45;
+      let ratio = (10 + term) / (wacc);
+      let calculatedVal = (baseVal * ratio * 0.95).toFixed(2);
+      let diff = (((calculatedVal - baseVal) / baseVal) * 100).toFixed(0);
+      
+      impliedValOutput.textContent = calculatedVal;
+      if (diff >= 0) {
+        safetyOutput.innerHTML = `▲ +${diff}% Safety Margin`;
+        safetyOutput.className = "text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded";
+      } else {
+        safetyOutput.innerHTML = `▼ ${diff}% Premium`;
+        safetyOutput.className = "text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded";
+      }
+    }
+
+    // PEER COMPARISON AUTOCOMPLETE & PERIOD (G8)
+    function showCompDropdown(slotIdx) {
+      document.getElementById('comp-dropdown-' + slotIdx).classList.remove('hidden');
+    }
+    
+    function selectCompSlot(slotIdx, symbol) {
+      document.getElementById('comp-dropdown-' + slotIdx).classList.add('hidden');
+      document.getElementById('comp-slot-' + slotIdx).value = symbol;
+      selectedCompareCompanies[slotIdx] = symbol;
+      
+      updateComparisonMetrics();
+      showToast(`Loaded ${symbol} into Slot ${slotIdx + 1}`);
+    }
+    
+    function updateComparisonMetrics() {
+      // Time period modifier
+      const period = document.getElementById('compare-period-selector').value;
+      activeComparePeriod = period;
+      
+      // Populate Headers
+      selectedCompareCompanies.forEach((symbol, idx) => {
+        const header = document.getElementById('comp-header-' + idx);
+        if (symbol) {
+          header.textContent = symbol + ` (${period})`;
+        } else {
+          header.textContent = "Empty Slot";
+        }
+      });
+      
+      // Generate row metrics
+      const metricsList = [
+        { label: 'Market Cap', key: 'marketCap' },
+        { label: 'PE TTM', key: 'pe' },
+        { label: 'ROCE %', key: 'roce' },
+        { label: 'CAGR 3Y %', key: 'cagr' },
+        { label: 'Debt to Equity', key: 'de' }
+      ];
+      
+      const tbody = document.getElementById('compare-table-body');
+      tbody.innerHTML = '';
+      
+      metricsList.forEach(m => {
+        let rowHtml = `<tr class="hover:bg-slate-50/50 transition"><td class="px-4 py-3 font-semibold text-slate-800">${m.label}</td>`;
+        
+        selectedCompareCompanies.forEach(symbol => {
+          if (symbol) {
+            const compData = mockCompanies[symbol];
+            let cellVal = compData ? compData[m.key] : 'N/A';
+            
+            // Alter values mockingly depending on time periods selected (G8)
+            if (period !== 'Latest') {
+              if (m.key === 'pe') cellVal = (parseFloat(cellVal) * 0.95).toFixed(1) + 'x';
+              if (m.key === 'roce') cellVal = (parseFloat(cellVal) * 1.05).toFixed(1) + '%';
+            }
+            
+            rowHtml += `<td class="px-4 py-3 font-semibold text-slate-900">${cellVal}</td>`;
+          } else {
+            rowHtml += `<td class="px-4 py-3 text-slate-400">—</td>`;
+          }
+        });
+        
+        rowHtml += `</tr>`;
+        tbody.innerHTML += rowHtml;
+      });
+    }
+
+    // ONBOARDING GUIDED SYSTEM TOUR (G10)
+    function updateTourStep() {
+      const content = document.getElementById('tour-step-content');
+      const btn = document.getElementById('tour-next-btn');
+      
+      if (tourStep === 1) {
+        content.innerHTML = `
+          <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 font-bold text-xs">1</span>
+          <div>
+            <strong class="text-slate-950 block">Search & Ticker Detail</strong>
+            Use the global command palette (<kbd class="bg-white border px-1.5 py-0.5 rounded text-xs shadow-sm">Ctrl+K</kbd>) to instantly pull up any company like RELIANCE, HDFCBANK, or TCS.
+          </div>
+        `;
+        btn.innerHTML = `Go to Companies <i data-lucide="arrow-right" class="h-4 w-4"></i>`;
+      } else if (tourStep === 2) {
+        content.innerHTML = `
+          <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 font-bold text-xs">2</span>
+          <div>
+            <strong class="text-slate-950 block">Run an Ingestion Screen</strong>
+            Navigate to the Screener tool inside the sidebar, filter companies with human-readable formulas, and save your screen configuration.
+          </div>
+        `;
+        btn.innerHTML = `Go to Screener <i data-lucide="arrow-right" class="h-4 w-4"></i>`;
+      } else if (tourStep === 3) {
+        content.innerHTML = `
+          <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-700 font-bold text-xs">3</span>
+          <div>
+            <strong class="text-slate-950 block">Generate pre-call questions</strong>
+            Open the Question Engine. Select HDFCBANK or RELIANCE to instantly run LLM agent templates generating drag-reorderable checklists.
+          </div>
+        `;
+        btn.innerHTML = `Finish Tour <i data-lucide="check" class="h-4 w-4"></i>`;
+      }
+      lucide.createIcons();
+    }
+    
+    function nextTourStep() {
+      if (tourStep === 1) {
+        tourStep = 2;
+        setRoute('companies');
+        updateTourStep();
+      } else if (tourStep === 2) {
+        tourStep = 3;
+        setRoute('screener');
+        updateTourStep();
+      } else if (tourStep === 3) {
+        skipOnboarding();
+        setRoute('questions');
+        showToast("Onboarding Completed! Enjoy InvestIQ.", false);
+      }
+    }
+    
+    function skipOnboarding() {
+      document.getElementById('onboarding-tour').classList.add('hidden');
+    }
+    
+    function toggleOnboarding() {
+      tourStep = 1;
+      document.getElementById('onboarding-tour').classList.remove('hidden');
+      updateTourStep();
+    }
+
+    // UTILS
+    function filterCompaniesGrid() {
+      const search = document.getElementById('companies-search').value.toUpperCase();
+      const sector = document.getElementById('companies-sector').value;
+      const cards = document.querySelectorAll('#companies-grid > div');
+      
+      cards.forEach(c => {
+        const ticker = c.getAttribute('data-ticker');
+        const cSector = c.getAttribute('data-sector');
+        
+        const matchesSearch = ticker.includes(search) || mockCompanies[ticker].name.toUpperCase().includes(search);
+        const matchesSector = sector === 'All' || cSector === sector;
+        
+        if (matchesSearch && matchesSector) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
+    }
+
+    function showToast(msg, isWarning = false) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-message');
+      const iconBox = document.getElementById('toast-icon-container');
+      
+      toastMsg.textContent = msg;
+      
+      if (isWarning) {
+        iconBox.className = "h-6 w-6 rounded-full bg-red-600 flex items-center justify-center text-white";
+        iconBox.innerHTML = `<i data-lucide="alert-octagon" class="h-4 w-4"></i>`;
+      } else {
+        iconBox.className = "h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white";
+        iconBox.innerHTML = `<i data-lucide="check" class="h-4 w-4"></i>`;
+      }
+      
+      lucide.createIcons();
+      
+      // Animate up
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      // Auto-hide
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+    
+    // Mobile More panel toggling (G12)
+    function toggleMobileMore(show) {
+      const menu = document.getElementById('mobile-more-menu');
+      const icon = document.getElementById('mob-more-icon');
+      
+      let shouldShow = show !== undefined ? show : menu.classList.contains('hidden');
+      
+      if (shouldShow) {
+        menu.classList.remove('hidden');
+        icon.setAttribute('data-lucide', 'x');
+      } else {
+        menu.classList.add('hidden');
+        icon.setAttribute('data-lucide', 'menu');
+      }
+      lucide.createIcons();
+    }
+    
+    // Theme Switcher API
+    function toggleDarkMode() {
+      const htmlEl = document.documentElement;
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        showToast("Switched to Light Mode");
+      } else {
+        htmlEl.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        showToast("Switched to Dark Mode");
+      }
+    }
+
+    // Simulate generic triggers
+    function exportScreenerToCSV() {
+      showToast("CSV file exported successfully!");
+    }
+    function triggerIngest() {
+      showToast("Ingestion run successfully scheduled.", false);
+    }
+  </script>
+</body>
+</html>
